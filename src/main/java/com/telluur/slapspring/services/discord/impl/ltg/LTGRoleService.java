@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -48,8 +49,11 @@ public class LTGRoleService {
      * @param success success callback
      * @param failure failure callback
      */
-    public void addMemberToRolesIfLTG(@Nonnull Member member, @Nonnull List<Role> roles, Consumer<List<Role>> success, Consumer<Throwable> failure) {
-        List<Role> validRoles = roles.stream().filter(role -> repository.existsById(role.getIdLong())).toList();
+    public void addMemberToRolesIfLTG(@Nonnull Member member, @Nonnull Collection<Role> roles, Consumer<List<Role>> success, Consumer<Throwable> failure) {
+        List<Role> validRoles = roles.stream()
+                .distinct()
+                .filter(role -> repository.existsById(role.getIdLong()))
+                .toList();
 
         if (validRoles.size() <= 0) {
             failure.accept(new IllegalArgumentException("No valid LTG roles provided"));

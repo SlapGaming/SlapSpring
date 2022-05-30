@@ -12,6 +12,7 @@ abstract class AbstractSystemCommand implements ICommand {
     /**
      * Implements the handle() by adding a bot side permissions check, either informing the user of denied access,
      * or delegating the InteractionEvent to systemHandle()
+     *
      * @param event InteractionEvent dispatched by discord
      */
     @Override

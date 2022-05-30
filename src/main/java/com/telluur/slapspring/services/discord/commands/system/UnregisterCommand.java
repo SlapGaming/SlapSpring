@@ -30,10 +30,10 @@ public class UnregisterCommand extends AbstractSystemCommand {
         Guild g = Objects.requireNonNull(event.getGuild());
 
         g.retrieveCommands().queue(commands -> commands.forEach(
-            command -> g.deleteCommandById(command.getId()).queue(
-                ok -> log.info("Successfully unregistered command: {}", command.getName()),
-                error -> log.error("Failed to unregister command: {}", command.getName(), error))),
-            error -> log.error("Failed to fetch existing commands", error)
+                        command -> g.deleteCommandById(command.getId()).queue(
+                                ok -> log.info("Successfully unregistered command: {}", command.getName()),
+                                error -> log.error("Failed to unregister command: {}", command.getName(), error))),
+                error -> log.error("Failed to fetch existing commands", error)
         );
     }
 }

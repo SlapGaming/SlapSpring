@@ -4,6 +4,7 @@ import com.telluur.slapspring.services.discord.commands.ICommand;
 import com.telluur.slapspring.services.discord.impl.ltg.LTGQuickSubscribeService;
 import com.telluur.slapspring.services.discord.impl.ltg.LTGRoleService;
 import net.dv8tion.jda.api.entities.IMentionable;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -67,13 +68,15 @@ public class SubscribeSlashCommand implements ICommand {
         if (roles.size() <= 0) {
             event.getHook().sendMessage("Uh-oh, somehow you didn't supply any roles... This should never happen..").queue();
         } else {
-            ltgRoleService.addMemberToRolesIfLTG(Objects.requireNonNull(event.getMember()), roles,
+            Member member = Objects.requireNonNull(event.getMember()); //Always in guild
+            ltgRoleService.addMemberToRolesIfLTG(member, roles,
                     joinedRoles -> {
                         String roleNames = joinedRoles.stream()
                                 .map(IMentionable::getAsMention)
                                 .collect(Collectors.joining(", "));
                         event.getHook().sendMessageFormat("Successfully joined %s.", roleNames).queue();
-                        //TODO Create quick subscribe message
+                        String broadcastMsg = LTGQuickSubscribeService.memberJoinedBroadcastMessage(member, joinedRoles);
+                        quickSubscribeService.sendQuickSubscribeWithMessage(joinedRoles, broadcastMsg);
                     },
                     fail -> {
                         event.getHook().sendMessageFormat("Failed to join LTG role(s): %s.", fail.getMessage()).queue();

@@ -2,7 +2,6 @@ package com.telluur.slapspring.services.discord.commands.user.ltg;
 
 import com.telluur.slapspring.model.ltg.LTGGameRepository;
 import com.telluur.slapspring.services.discord.commands.ICommand;
-import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;

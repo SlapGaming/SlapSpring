@@ -25,17 +25,17 @@ public class DotCommandDeprecationListener extends ListenerAdapter {
                     "about",
                     "ping",
                     "version")
-            .map(s -> "." + s).toList();
+            .flatMap(s -> Stream.of("." + s, "!" + s))
+            .toList();
 
 
     @Override
     public void onMessageReceived(@NotNull MessageReceivedEvent event) {
         for (String dot : deprecatedDotCommands) {
             if (event.getMessage().getContentDisplay().startsWith(dot)) {
-                event.getChannel().sendMessageFormat(
-                        "The %s command has moved to slash commands.\r\nType `/` in the chat to get started with the new commands."
-                ).queue();
-                return;
+                event.getChannel().sendMessageFormat("The %s command has moved to slash commands.\r\n" +
+                        "Type `/` in the chat to get started with the new commands.", dot).queue();
+                return; //early return
             }
         }
     }
