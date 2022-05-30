@@ -1,0 +1,28 @@
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${MARIADB_USER}
+    password: ${MARIADB_PASSWORD}
+    driver-class-name: org.mariadb.jdbc.Driver
+    hikari:
+      max-lifetime: 580000
+  jpa:
+    hibernate:
+      ddl-auto: update
+    database-platform: com.telluur.slapspring.util.CustomMariaDB103Dialect
+    show-sql: false
+
+jda:
+  token: ${DISCORD_TOKEN}
+  status-type: ${DISCORD_STATUS_TYPE}
+  status-message: ${DISCORD_STATUS_MESSAGE}
+  guild: ${DISCORD_GUILD}
+  system-users:
+    - ${DISCORD_USER_RICK}
+    - ${DISCORD_USER_LEON}
+  role-admin: ${DISCORD_ROLE_ADMIN}
+  role-mod: ${DISCORD_ROLE_MOD}
+  role-community: ${DISCORD_ROLE_COMMUNITY}
+  tx-general: ${DISCORD_TX_GENERAL}
+  tx-ltg: ${DISCORD_TX_LTG}
+  tx-nda: ${DISCORD_TX_NSA}
