@@ -24,5 +24,7 @@ public class LTGGame {
 
     @NonNull
     private String abbreviation, fullName;
+
+    private String description;
 }
 

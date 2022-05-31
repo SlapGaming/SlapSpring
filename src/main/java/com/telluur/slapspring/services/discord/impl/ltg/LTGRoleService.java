@@ -10,9 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 @Service
@@ -50,6 +50,7 @@ public class LTGRoleService {
      * @param failure failure callback
      */
     public void addMemberToRolesIfLTG(@Nonnull Member member, @Nonnull Collection<Role> roles, Consumer<List<Role>> success, Consumer<Throwable> failure) {
+        log.info("LTG:A");
         List<Role> validRoles = roles.stream()
                 .distinct()
                 .filter(role -> repository.existsById(role.getIdLong()))
@@ -60,9 +61,14 @@ public class LTGRoleService {
         } else {
             Guild guild = botSession.getBoundGuild();
 
-            List<Role> joinedRoles = new ArrayList<>();
-            Throwable lastThrow;
-            validRoles.forEach(r -> guild.addRoleToMember(member, r).queue(ok -> joinedRoles.add(r)));
+            List<Role> joinedRoles = validRoles.stream()
+                    .map(r -> guild.addRoleToMember(member, r).submit() //Join roles, callback returns void
+                            .thenCompose(ok -> CompletableFuture.completedFuture(r))) //manually return a stage with the joined role if no errors.
+                    .map(CompletableFuture::join)
+                    .toList();
+
+
+            log.info("LTG JOINED {}",joinedRoles.size());
 
             if (joinedRoles.size() <= 0) {
                 failure.accept(new IllegalAccessError("Discord API error"));

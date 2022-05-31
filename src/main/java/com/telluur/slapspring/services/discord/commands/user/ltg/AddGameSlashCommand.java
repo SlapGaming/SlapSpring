@@ -102,7 +102,7 @@ public class AddGameSlashCommand extends ListenerAdapter implements ICommand {
                     .setColor(new Color(17, 128, 106))
                     .queue(
                             role -> {
-                                LTGGame ltgGame = new LTGGame(role.getIdLong(), abbreviation, fullname);
+                                LTGGame ltgGame = new LTGGame(role.getIdLong(), abbreviation, fullname, null);
                                 gameRepository.save(ltgGame);
                                 ltgLogger.info(String.format("Role `%s` with id `%s` created", role.getName(), role.getId()));
                                 event.getHook().sendMessageFormat("Created LTG role, `%s`", role.getName()).queue();

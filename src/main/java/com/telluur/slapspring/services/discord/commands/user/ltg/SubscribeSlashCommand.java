@@ -33,7 +33,7 @@ public class SubscribeSlashCommand implements ICommand {
 
     private static final OptionData roleOption = new OptionData(OptionType.ROLE, OPTION_ROLE_NAME + 1, OPTION_ROLE_DESCRIPTION, true);
 
-    private static final List<OptionData> varRoleOptions = IntStream.range(2, 25)
+    private static final List<OptionData> varRoleOptions = IntStream.range(2, 26)
             .mapToObj(i -> new OptionData(OptionType.ROLE, OPTION_ROLE_NAME + i, OPTION_VAR_ROLE_DESCRIPTION, false))
             .toList();
     private static final CommandData commandData = Commands.slash(COMMAND_NAME, COMMAND_DESCRIPTION)
@@ -59,7 +59,7 @@ public class SubscribeSlashCommand implements ICommand {
     public void handle(SlashCommandInteractionEvent event) {
         event.deferReply(true).queue();
 
-        List<Role> roles = IntStream.range(1, 25)
+        List<Role> roles = IntStream.range(1, 26)
                 .mapToObj(i -> event.getOption(OPTION_ROLE_NAME + i, null, OptionMapping::getAsRole))
                 .filter(Objects::nonNull)
                 .distinct()
