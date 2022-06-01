@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
@@ -56,30 +57,52 @@ public class LTGRoleService {
                 .filter(role -> repository.existsById(role.getIdLong()))
                 .toList();
 
-        if (validRoles.size() <= 0) {
+        if (validRoles.size() <= 1) { //1 since community role was added.
             failure.accept(new IllegalArgumentException("No valid LTG roles provided"));
         } else {
             Guild guild = botSession.getBoundGuild();
 
-            List<Role> joinedRoles = validRoles.stream()
-                    .map(r -> guild.addRoleToMember(member, r).submit() //Join roles, callback returns void
-                            .thenCompose(ok -> CompletableFuture.completedFuture(r))) //manually return a stage with the joined role if no errors.
-                    .map(CompletableFuture::join)
-                    .toList();
+
+            guild.modifyMemberRoles(member, validRoles, null).queue(
+                    v -> {},
+                    e -> {}
+            );
 
 
-            log.info("LTG JOINED {}",joinedRoles.size());
+            //NEW
 
-            if (joinedRoles.size() <= 0) {
-                failure.accept(new IllegalAccessError("Discord API error"));
-            } else {
-                success.accept(joinedRoles);
-                //Add community role
-                Role communityRole = guild.getRoleById(botSession.getBotProperties().role_community());
-                if (communityRole != null && !member.getRoles().contains(communityRole)) {
-                    guild.addRoleToMember(member, communityRole).queue();
-                }
-            }
+            List<CompletableFuture<Role>> roleFutures = validRoles.stream().map(r ->
+                    guild.addRoleToMember(member, r)
+                            .submit() //This stage has type void
+                            //.handle((v, e) -> e != null ? null : r) //When role add was successful, return CF<Role>, else CF<null>
+                            .thenApply(v -> r)
+                            .exceptionally(e -> null)
+            ).toList();
+
+            log.info("LTG Post role adds submits");
+
+            CompletableFuture.allOf(roleFutures.toArray(CompletableFuture[]::new))
+                    .thenAccept(v -> {
+                        List<Role> joinedRoles = roleFutures.stream()
+                                .map(CompletableFuture::join) //This is nonBlocking since due to allOf() callback
+                                .filter(Objects::nonNull) //Filter out the error'd roles
+                                .toList();
+
+                        log.info("LTG JOINED {}", joinedRoles.size());
+
+                        if (joinedRoles.size() <= 0) {
+                            failure.accept(new IllegalAccessError("Discord API error"));
+                        } else {
+                            success.accept(joinedRoles);
+                            //Add community role
+                            Role communityRole = guild.getRoleById(botSession.getBotProperties().role_community());
+                            if (communityRole != null && !member.getRoles().contains(communityRole)) {
+                                guild.addRoleToMember(member, communityRole).queue();
+                            }
+                        }
+                    });
+            log.info("LTG Post allof()");
         }
     }
+
 }

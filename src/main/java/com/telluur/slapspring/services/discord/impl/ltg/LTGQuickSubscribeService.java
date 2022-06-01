@@ -161,7 +161,7 @@ public class LTGQuickSubscribeService extends ListenerAdapter {
     public static String memberJoinedBroadcastMessage(Member member, Collection<Role> roles) {
         String rolesString = roles.stream()
                 .map(Role::getName)
-                .collect(Collectors.joining(",", "`", "`"));
+                .collect(Collectors.joining(", ", "`", "`"));
         return String.format("`%s` joined %s", member.getEffectiveName(), rolesString);
     }
 
