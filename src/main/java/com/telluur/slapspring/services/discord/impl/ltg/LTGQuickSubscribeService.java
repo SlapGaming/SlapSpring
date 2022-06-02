@@ -30,7 +30,7 @@ public class LTGQuickSubscribeService extends ListenerAdapter {
 
     private static final String SUBSCRIBE_ACTION_TEXT = "Subscribe to %s";
     private static final String SUCCESS_EPHEMERAL = "Successfully joined %s.";
-    private static final String FAILURE_EPHEMERAL = "Failed to join: %s.";
+    private static final String FAILURE_EPHEMERAL = "Failed to join: %s";
 
     @Autowired
     private BotSession botSession;
@@ -67,7 +67,11 @@ public class LTGQuickSubscribeService extends ListenerAdapter {
                 .map(Optional::get)
                 .toList();
 
-        if (ltgGames.size() <= 2) {
+        int size = ltgGames.size();
+        if(size <= 0){
+            //Early return.
+            return;
+        } else if (size <= 2) {
             //We create 2 LTG buttons and the info button.
             List<Button> buttons = ltgGames.stream().map(ltgGame -> Button.primary(
                     String.format("%s%d", QUICK_SUBSCRIBE_PREFIX, ltgGame.getId()),

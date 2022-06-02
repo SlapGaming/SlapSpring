@@ -4,7 +4,9 @@ import com.telluur.slapspring.model.ltg.LTGGame;
 import com.telluur.slapspring.model.ltg.LTGGameRepository;
 import com.telluur.slapspring.services.discord.BotSession;
 import com.telluur.slapspring.services.discord.commands.ICommand;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -104,11 +106,24 @@ public class AddGameSlashCommand extends ListenerAdapter implements ICommand {
                             role -> {
                                 LTGGame ltgGame = new LTGGame(role.getIdLong(), abbreviation, fullname, null);
                                 gameRepository.save(ltgGame);
-                                ltgLogger.info(String.format("Role `%s` with id `%s` created", role.getName(), role.getId()));
-                                event.getHook().sendMessageFormat("Created LTG role, `%s`", role.getName()).queue();
+                                ltgLogger.info(String.format("`%s` created LTG role `%s` with id `%s`.", event.getUser().getAsTag(), role.getName(), role.getId()));
+
+                                MessageEmbed me = new EmbedBuilder()
+                                        .setColor(new Color(17, 128, 106))
+                                        .setTitle("Looking-To-Game Success")
+                                        .setDescription(String.format("Created LTG role, `%s`.\n" +
+                                                "To delete an LTG role, simply delete it using Discord's guild manager. " +
+                                                "The bot binding will be removed automatically.", role.getName()))
+                                        .build();
+                                event.getHook().sendMessageEmbeds(me).queue();
                             },
                             fail -> {
-                                event.getHook().sendMessageFormat("Failed to create LTG role, `%s | %s`", abbreviation, fullname).queue();
+                                MessageEmbed me = new EmbedBuilder()
+                                        .setColor(new Color(17, 128, 106))
+                                        .setTitle("Looking-To-Game Failure")
+                                        .setDescription(String.format("Failed to create LTG role, `%s | %s`", abbreviation, fullname))
+                                        .build();
+                                event.getHook().sendMessageEmbeds(me).queue();
                             }
                     );
         }

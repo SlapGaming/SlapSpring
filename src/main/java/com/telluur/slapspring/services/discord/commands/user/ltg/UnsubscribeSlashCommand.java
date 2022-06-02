@@ -1,9 +1,11 @@
 package com.telluur.slapspring.services.discord.commands.user.ltg;
 
-import com.telluur.slapspring.model.ltg.LTGGameRepository;
 import com.telluur.slapspring.services.discord.commands.ICommand;
-import net.dv8tion.jda.api.entities.Guild;
+import com.telluur.slapspring.services.discord.impl.ltg.LTGRoleService;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.IMentionable;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -15,7 +17,11 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.awt.*;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 
 @Service
@@ -24,14 +30,19 @@ public class UnsubscribeSlashCommand implements ICommand {
     public static final String COMMAND_DESCRIPTION = "Silently leave a @game role.";
     public static final String OPTION_ROLE_NAME = "role";
     public static final String OPTION_ROLE_DESCRIPTION = "The game role you want to leave";
+    public static final String OPTION_VAR_ROLE_DESCRIPTION = "The additional roles your want to leave";
 
+    private static final OptionData roleOption = new OptionData(OptionType.ROLE, OPTION_ROLE_NAME + 1, OPTION_ROLE_DESCRIPTION, true);
 
-    private static final OptionData roleOption = new OptionData(OptionType.ROLE, OPTION_ROLE_NAME, OPTION_ROLE_DESCRIPTION, true);
+    private static final List<OptionData> varRoleOptions = IntStream.range(2, 26)
+            .mapToObj(i -> new OptionData(OptionType.ROLE, OPTION_ROLE_NAME + i, OPTION_VAR_ROLE_DESCRIPTION, false))
+            .toList();
     private static final CommandData commandData = Commands.slash(COMMAND_NAME, COMMAND_DESCRIPTION)
-            .addOptions(roleOption);
+            .addOptions(roleOption)
+            .addOptions(varRoleOptions);
 
     @Autowired
-    LTGGameRepository repo;
+    LTGRoleService ltgRoleService;
 
     @Autowired
     Logger ltgLogger;
@@ -44,21 +55,42 @@ public class UnsubscribeSlashCommand implements ICommand {
     @Override
     public void handle(SlashCommandInteractionEvent event) {
         event.deferReply(true).queue();
-        Role role = Objects.requireNonNull(event.getOption(OPTION_ROLE_NAME, OptionMapping::getAsRole)); //Should never be null as the argument is required.
-        if (repo.existsById(role.getIdLong())) {
-            Guild guild = Objects.requireNonNull(event.getGuild()); //Should never be null as command is limited to guild.
-            Member member = Objects.requireNonNull(event.getMember()); //Should never be null as command is limited to guild.
-            guild.removeRoleFromMember(member, role).queue(
-                    ok -> {
-                        event.getHook().sendMessageFormat("You are now unsubscribed from %s", role.getAsMention()).queue();
+
+        List<Role> roles = IntStream.range(1, 26)
+                .mapToObj(i -> event.getOption(OPTION_ROLE_NAME + i, null, OptionMapping::getAsRole))
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList();
+
+        if (roles.size() <= 0) {
+            MessageEmbed me = new EmbedBuilder()
+                    .setColor(Color.RED)
+                    .setTitle("Looking-To-Game Failure")
+                    .setDescription("Uh-oh, somehow you didn't supply any roles... This should never happen..")
+                    .build();
+            event.getHook().sendMessageEmbeds(me).queue();
+        } else {
+            Member member = Objects.requireNonNull(event.getMember()); //Always in guild
+            ltgRoleService.removeMemberFromRolesIfLTG(member, roles,
+                    leftRoles -> {
+                        String roleNames = leftRoles.stream()
+                                .map(IMentionable::getAsMention)
+                                .collect(Collectors.joining(", "));
+                        MessageEmbed me = new EmbedBuilder()
+                                .setColor(new Color(17, 128, 106))
+                                .setTitle("Looking-To-Game Success")
+                                .setDescription(String.format("Successfully left %s.", roleNames))
+                                .build();
+                        event.getHook().sendMessageEmbeds(me).queue();
                     },
                     fail -> {
-                        //This should only happen when the bot does not have sufficient permissions.
-                        event.getHook().sendMessageFormat("Failed to leave %s.", role.getAsMention()).queue();
-                        ltgLogger.error("Could not assign role {} to {}", role.getName(), member.getEffectiveName(), fail);
+                        MessageEmbed me = new EmbedBuilder()
+                                .setColor(Color.RED)
+                                .setTitle("Looking-To-Game Failure")
+                                .setDescription(String.format("Failed to leave: %s", fail.getMessage()))
+                                .build();
+                        event.getHook().sendMessageEmbeds(me).queue();
                     });
-        } else {
-            event.replyFormat("Failed to leave %s. Not a LTG role.", role.getAsMention()).setEphemeral(true).queue();
         }
     }
 }

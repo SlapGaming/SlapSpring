@@ -2,10 +2,11 @@ package com.telluur.slapspring.services.discord.impl.ltg;
 
 import com.telluur.slapspring.model.ltg.LTGGameRepository;
 import com.telluur.slapspring.services.discord.BotSession;
-import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.exceptions.HierarchyException;
+import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,7 +18,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 @Service
-@Slf4j
 public class LTGRoleService {
 
     @Autowired
@@ -51,47 +51,43 @@ public class LTGRoleService {
      * @param failure failure callback
      */
     public void addMemberToRolesIfLTG(@Nonnull Member member, @Nonnull Collection<Role> roles, Consumer<List<Role>> success, Consumer<Throwable> failure) {
-        log.info("LTG:A");
         List<Role> validRoles = roles.stream()
                 .distinct()
+                .filter(role -> !member.getRoles().contains(role))
                 .filter(role -> repository.existsById(role.getIdLong()))
                 .toList();
 
-        if (validRoles.size() <= 1) { //1 since community role was added.
-            failure.accept(new IllegalArgumentException("No valid LTG roles provided"));
+        if (validRoles.size() <= 0) { //1 since community role was added.
+            failure.accept(new IllegalArgumentException("The roles provided are either non-LTG roles, or you are already a subscribed."));
         } else {
             Guild guild = botSession.getBoundGuild();
 
-
-            guild.modifyMemberRoles(member, validRoles, null).queue(
-                    v -> {},
-                    e -> {}
-            );
-
-
-            //NEW
-
-            List<CompletableFuture<Role>> roleFutures = validRoles.stream().map(r ->
-                    guild.addRoleToMember(member, r)
-                            .submit() //This stage has type void
-                            //.handle((v, e) -> e != null ? null : r) //When role add was successful, return CF<Role>, else CF<null>
-                            .thenApply(v -> r)
-                            .exceptionally(e -> null)
+            List<CompletableFuture<Role>> roleFutures = validRoles.stream().map(r -> {
+                        CompletableFuture<Role> cf;
+                        try {
+                            cf = guild.addRoleToMember(member, r)
+                                    .submit()
+                                    //Return future with role when void stage succeeds.
+                                    .thenApply(v -> r)
+                                    //Return future with null when unchecked exception is thrown
+                                    .exceptionally(e -> null);
+                        } catch (IllegalArgumentException | InsufficientPermissionException | HierarchyException ignored) {
+                            cf = CompletableFuture.completedFuture(null);
+                        }
+                        return cf;
+                    }
             ).toList();
 
-            log.info("LTG Post role adds submits");
-
+            //Create nonblocking callback for when all role adds complete.
             CompletableFuture.allOf(roleFutures.toArray(CompletableFuture[]::new))
                     .thenAccept(v -> {
                         List<Role> joinedRoles = roleFutures.stream()
-                                .map(CompletableFuture::join) //This is nonBlocking since due to allOf() callback
+                                .map(CompletableFuture::join) //This should be non-blocking due to allOf() callback
                                 .filter(Objects::nonNull) //Filter out the error'd roles
                                 .toList();
 
-                        log.info("LTG JOINED {}", joinedRoles.size());
-
                         if (joinedRoles.size() <= 0) {
-                            failure.accept(new IllegalAccessError("Discord API error"));
+                            failure.accept(new IllegalAccessError("Discord API error, most likely bot permissions"));
                         } else {
                             success.accept(joinedRoles);
                             //Add community role
@@ -101,8 +97,54 @@ public class LTGRoleService {
                             }
                         }
                     });
-            log.info("LTG Post allof()");
         }
     }
 
+    public void removeMemberFromRolesIfLTG(@Nonnull Member member, @Nonnull Role role, Consumer<Role> success, Consumer<Throwable> failure) {
+        removeMemberFromRolesIfLTG(member, List.of(role), roles -> success.accept(roles.get(0)), failure);
+    }
+
+    public void removeMemberFromRolesIfLTG(@Nonnull Member member, @Nonnull Collection<Role> roles, Consumer<List<Role>> success, Consumer<Throwable> failure) {
+        List<Role> validRoles = roles.stream()
+                .distinct()
+                .filter(role -> member.getRoles().contains(role))
+                .filter(role -> repository.existsById(role.getIdLong()))
+                .toList();
+        if (validRoles.size() <= 0) { //1 since community role was added.
+            failure.accept(new IllegalArgumentException("The roles provided are either non-LTG roles, or you are already a unsubscribed."));
+        } else {
+            Guild guild = botSession.getBoundGuild();
+
+            List<CompletableFuture<Role>> roleFutures = validRoles.stream().map(r -> {
+                        CompletableFuture<Role> cf;
+                        try {
+                            cf = guild.removeRoleFromMember(member, r)
+                                    .submit()
+                                    //Return future with role when void stage succeeds.
+                                    .thenApply(v -> r)
+                                    //Return future with null when unchecked exception is thrown
+                                    .exceptionally(e -> null);
+                        } catch (IllegalArgumentException | InsufficientPermissionException | HierarchyException ignored) {
+                            cf = CompletableFuture.completedFuture(null);
+                        }
+                        return cf;
+                    }
+            ).toList();
+
+            //Create nonblocking callback for when all role adds complete.
+            CompletableFuture.allOf(roleFutures.toArray(CompletableFuture[]::new))
+                    .thenAccept(v -> {
+                        List<Role> leftRoles = roleFutures.stream()
+                                .map(CompletableFuture::join) //This should be non-blocking due to allOf() callback
+                                .filter(Objects::nonNull) //Filter out the error'd roles
+                                .toList();
+
+                        if (leftRoles.size() <= 0) {
+                            failure.accept(new IllegalAccessError("Discord API error, most likely bot permissions"));
+                        } else {
+                            success.accept(leftRoles);
+                        }
+                    });
+        }
+    }
 }
