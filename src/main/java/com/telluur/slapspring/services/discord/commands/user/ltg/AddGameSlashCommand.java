@@ -4,7 +4,7 @@ import com.telluur.slapspring.model.ltg.LTGGame;
 import com.telluur.slapspring.model.ltg.LTGGameRepository;
 import com.telluur.slapspring.services.discord.BotSession;
 import com.telluur.slapspring.services.discord.commands.ICommand;
-import net.dv8tion.jda.api.EmbedBuilder;
+import com.telluur.slapspring.services.discord.impl.ltg.LTGUtil;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
@@ -22,7 +22,6 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import java.awt.*;
-import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -73,29 +72,27 @@ public class AddGameSlashCommand extends ListenerAdapter implements ICommand {
     @Override
     public void onModalInteraction(@Nonnull ModalInteractionEvent event) {
         if (event.getModalId().equals(MODAL_ID)) {
+            event.deferReply(true).queue();
+
             String abbreviation = Objects.requireNonNull(event.getValue(MODAL_ABBRV)).getAsString();
             String fullname = Objects.requireNonNull(event.getValue(MODAL_NAME)).getAsString();
 
-            final List<String> ILLEGAL_CHARS = "|\"'`(){}[]<>/"
-                    .chars()
-                    .mapToObj(i -> Character.toString((char) i))
-                    .toList();
 
-            if (ILLEGAL_CHARS.stream().anyMatch(abbreviation::contains)) {
-                event.replyFormat(
-                        "Failed to create LTG Role.\r\nThe abbreviation contained one of the following illegal characters: `%s`",
-                        ILLEGAL_CHARS).queue();
+            if (!abbreviation.chars().allMatch(Character::isLetterOrDigit)) {
+                String message = "Failed to create LTG Role.\r\n" +
+                        "The abbreviation contains a non-alphanumeric character.";
+                MessageEmbed me = LTGUtil.failureEmbed(message);
+                event.getHook().sendMessageEmbeds(me).queue();
                 return;
             }
 
-            if (ILLEGAL_CHARS.stream().anyMatch(fullname::contains)) {
-                event.replyFormat(
-                        "Failed to create LTG Role.\r\nThe name contained one of the following illegal characters: `%s`",
-                        ILLEGAL_CHARS).queue();
+            if (!fullname.chars().allMatch(Character::isLetterOrDigit)) {
+                String message = "Failed to create LTG Role.\r\n" +
+                        "The name contains a non-alphanumeric character.";
+                MessageEmbed me = LTGUtil.failureEmbed(message);
+                event.getHook().sendMessageEmbeds(me).queue();
                 return;
             }
-
-            event.deferReply(true).queue();
 
             Objects.requireNonNull(event.getGuild()).createRole() //Guild cannot be null as the command is only available in the guild
                     .setName(String.format("%s | %s", abbreviation, fullname))
@@ -108,21 +105,14 @@ public class AddGameSlashCommand extends ListenerAdapter implements ICommand {
                                 gameRepository.save(ltgGame);
                                 ltgLogger.info(String.format("`%s` created LTG role `%s` with id `%s`.", event.getUser().getAsTag(), role.getName(), role.getId()));
 
-                                MessageEmbed me = new EmbedBuilder()
-                                        .setColor(new Color(17, 128, 106))
-                                        .setTitle("Looking-To-Game Success")
-                                        .setDescription(String.format("Created LTG role, `%s`.\n" +
-                                                "To delete an LTG role, simply delete it using Discord's guild manager. " +
-                                                "The bot binding will be removed automatically.", role.getName()))
-                                        .build();
+
+                                MessageEmbed me = LTGUtil.successEmbed(String.format("Created LTG role, `%s`.\n" +
+                                        "To delete a Looking-To-Game role, simply delete it using Discord's guild manager. " +
+                                        "The bot binding will be removed automatically.", role.getName()));
                                 event.getHook().sendMessageEmbeds(me).queue();
                             },
                             fail -> {
-                                MessageEmbed me = new EmbedBuilder()
-                                        .setColor(new Color(17, 128, 106))
-                                        .setTitle("Looking-To-Game Failure")
-                                        .setDescription(String.format("Failed to create LTG role, `%s | %s`", abbreviation, fullname))
-                                        .build();
+                                MessageEmbed me = LTGUtil.failureEmbed(String.format("Failed to create LTG role, `%s | %s`", abbreviation, fullname));
                                 event.getHook().sendMessageEmbeds(me).queue();
                             }
                     );

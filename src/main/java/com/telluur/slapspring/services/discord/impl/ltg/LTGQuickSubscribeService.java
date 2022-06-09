@@ -5,8 +5,8 @@ import com.telluur.slapspring.model.ltg.LTGGameRepository;
 import com.telluur.slapspring.services.discord.BotSession;
 import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.IMentionable;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
@@ -19,7 +19,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,8 +32,6 @@ public class LTGQuickSubscribeService extends ListenerAdapter {
     private static final Button INFO_BUTTON = Button.link("https://discord.com/channels/276858200853184522/596030791214170112/663754415504752650", "What's this?");
 
     private static final String SUBSCRIBE_ACTION_TEXT = "Subscribe to %s";
-    private static final String SUCCESS_EPHEMERAL = "Successfully joined %s.";
-    private static final String FAILURE_EPHEMERAL = "Failed to join: %s";
 
     @Autowired
     private BotSession botSession;
@@ -68,7 +69,7 @@ public class LTGQuickSubscribeService extends ListenerAdapter {
                 .toList();
 
         int size = ltgGames.size();
-        if(size <= 0){
+        if (size <= 0) {
             //Early return.
             return;
         } else if (size <= 2) {
@@ -111,11 +112,13 @@ public class LTGQuickSubscribeService extends ListenerAdapter {
             if (member != null && role != null) {
                 ltgRoleService.addMemberToRoleIfLTG(member, role,
                         r -> {
-                            event.getHook().sendMessageFormat(SUCCESS_EPHEMERAL, r.getAsMention()).queue();
-                            botSession.getLTGTX().sendMessage(memberJoinedBroadcastMessage(member, r)).queue();
+                            MessageEmbed me = LTGUtil.joinSuccessEmbed(r);
+                            event.getHook().sendMessageEmbeds(me).queue();
+                            botSession.getLTGTX().sendMessage(LTGUtil.joinBroadcastMessage(member, r)).queue();
                         },
                         fail -> {
-                            event.getHook().sendMessageFormat(FAILURE_EPHEMERAL, fail.getMessage()).queue();
+                            MessageEmbed me = LTGUtil.joinFailEmbed(fail.getMessage());
+                            event.getHook().sendMessageEmbeds(me).queue();
                         });
             } else {
                 //member should never be null, as the buttons only get posted in the guild.
@@ -142,32 +145,18 @@ public class LTGQuickSubscribeService extends ListenerAdapter {
 
                 ltgRoleService.addMemberToRolesIfLTG(member, selectedGuildRoles,
                         joinedRoles -> {
-                            String mentionString = joinedRoles.stream()
-                                    .map(IMentionable::getAsMention)
-                                    .collect(Collectors.joining(","));
-                            event.getHook().sendMessageFormat(SUCCESS_EPHEMERAL, mentionString).queue();
-                            botSession.getLTGTX().sendMessage(memberJoinedBroadcastMessage(member, joinedRoles)).queue();
+                            MessageEmbed me = LTGUtil.joinSuccessEmbed(joinedRoles);
+                            event.getHook().sendMessageEmbeds(me).queue();
+                            botSession.getLTGTX().sendMessage(LTGUtil.joinBroadcastMessage(member, joinedRoles)).queue();
                         },
                         fail -> {
-                            event.getHook().sendMessageFormat(FAILURE_EPHEMERAL, fail.getMessage()).queue();
+                            MessageEmbed me = LTGUtil.joinFailEmbed(fail.getMessage());
+                            event.getHook().sendMessageEmbeds(me).queue();
                         });
             } else {
-                event.getHook().sendMessage("Failed to join any roles. Do the roles in your selection still exist?").queue();
+                MessageEmbed me = LTGUtil.joinFailEmbed("Do the roles in your selection still exist?");
+                event.getHook().sendMessageEmbeds(me).queue();
             }
         }
     }
-
-
-    public static String memberJoinedBroadcastMessage(Member member, Role role) {
-        return memberJoinedBroadcastMessage(member, Collections.singleton(role));
-    }
-
-    public static String memberJoinedBroadcastMessage(Member member, Collection<Role> roles) {
-        String rolesString = roles.stream()
-                .map(Role::getName)
-                .collect(Collectors.joining(", ", "`", "`"));
-        return String.format("`%s` joined %s", member.getEffectiveName(), rolesString);
-    }
-
-
 }

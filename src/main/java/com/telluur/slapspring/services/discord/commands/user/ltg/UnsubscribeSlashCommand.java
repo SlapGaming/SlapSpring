@@ -2,8 +2,7 @@ package com.telluur.slapspring.services.discord.commands.user.ltg;
 
 import com.telluur.slapspring.services.discord.commands.ICommand;
 import com.telluur.slapspring.services.discord.impl.ltg.LTGRoleService;
-import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.IMentionable;
+import com.telluur.slapspring.services.discord.impl.ltg.LTGUtil;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.Role;
@@ -17,10 +16,8 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.awt.*;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 
@@ -39,7 +36,8 @@ public class UnsubscribeSlashCommand implements ICommand {
             .toList();
     private static final CommandData commandData = Commands.slash(COMMAND_NAME, COMMAND_DESCRIPTION)
             .addOptions(roleOption)
-            .addOptions(varRoleOptions);
+            .addOptions(varRoleOptions)
+            .setDefaultEnabled(true);
 
     @Autowired
     LTGRoleService ltgRoleService;
@@ -63,32 +61,17 @@ public class UnsubscribeSlashCommand implements ICommand {
                 .toList();
 
         if (roles.size() <= 0) {
-            MessageEmbed me = new EmbedBuilder()
-                    .setColor(Color.RED)
-                    .setTitle("Looking-To-Game Failure")
-                    .setDescription("Uh-oh, somehow you didn't supply any roles... This should never happen..")
-                    .build();
+            MessageEmbed me = LTGUtil.failureEmbed("Uh-oh, somehow you didn't supply any roles... This should never happen..");
             event.getHook().sendMessageEmbeds(me).queue();
         } else {
             Member member = Objects.requireNonNull(event.getMember()); //Always in guild
             ltgRoleService.removeMemberFromRolesIfLTG(member, roles,
                     leftRoles -> {
-                        String roleNames = leftRoles.stream()
-                                .map(IMentionable::getAsMention)
-                                .collect(Collectors.joining(", "));
-                        MessageEmbed me = new EmbedBuilder()
-                                .setColor(new Color(17, 128, 106))
-                                .setTitle("Looking-To-Game Success")
-                                .setDescription(String.format("Successfully left %s.", roleNames))
-                                .build();
+                        MessageEmbed me = LTGUtil.leaveSuccessEmbed(leftRoles);
                         event.getHook().sendMessageEmbeds(me).queue();
                     },
                     fail -> {
-                        MessageEmbed me = new EmbedBuilder()
-                                .setColor(Color.RED)
-                                .setTitle("Looking-To-Game Failure")
-                                .setDescription(String.format("Failed to leave: %s", fail.getMessage()))
-                                .build();
+                        MessageEmbed me = LTGUtil.leaveFailureEmbed(String.format("Failed to leave: %s", fail.getMessage()));
                         event.getHook().sendMessageEmbeds(me).queue();
                     });
         }

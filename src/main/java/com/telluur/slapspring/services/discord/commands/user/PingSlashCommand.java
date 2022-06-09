@@ -12,7 +12,7 @@ import java.util.Random;
 public class PingSlashCommand implements ICommand {
     public static final String COMMAND_NAME = "ping";
     public static final String COMMAND_DESCRIPTION = "Simple ping pong command.";
-    private static final CommandData commandData = Commands.slash(COMMAND_NAME, COMMAND_DESCRIPTION);
+    private static final CommandData commandData = Commands.slash(COMMAND_NAME, COMMAND_DESCRIPTION).setDefaultEnabled(true);
 
     private static final String[] puns = {
             "What do you serve but not eat? \n" +

@@ -33,7 +33,7 @@ public class AvatarSlashCommand implements ICommand {
             .addChoice(OPTION_TYPE_CHOICE_GUILD, OPTION_TYPE_CHOICE_GUILD);
 
     private static final CommandData commandData = Commands.slash(COMMAND_NAME, COMMAND_DESCRIPTION)
-            .addOptions(memberOption, typeOption);
+            .addOptions(memberOption, typeOption).setDefaultEnabled(true);
 
     @Override
     public CommandData data() {

@@ -20,7 +20,7 @@ public class RollSlashCommand implements ICommand {
 
     private static final OptionData boundOption = new OptionData(OptionType.INTEGER, OPTION_BOUND_NAME, OPTION_BOUND_DESCRIPTION, true).setMinValue(2);
     private static final CommandData commandData = Commands.slash(COMMAND_NAME, COMMAND_DESCRIPTION)
-            .addOptions(boundOption);
+            .addOptions(boundOption).setDefaultEnabled(true);
 
 
     private final Random rand = new Random();

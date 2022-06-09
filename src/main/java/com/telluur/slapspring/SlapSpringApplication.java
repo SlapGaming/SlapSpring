@@ -1,5 +1,6 @@
 package com.telluur.slapspring;
 
+import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
 import com.telluur.slapspring.services.discord.BotProperties;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -23,13 +24,19 @@ public class SlapSpringApplication {
     }
 
     @Bean
-    public JDA initJDA(@Autowired BotProperties botProperties) throws LoginException, InterruptedException {
+    public JDA initJDA(@Autowired BotProperties botProperties, @Autowired EventWaiter waiter) throws LoginException, InterruptedException {
         //logger.info("Bot config: {}", botProperties.toString());
         return JDABuilder
                 .create(botProperties.token(), EnumSet.allOf(GatewayIntent.class))
                 .setActivity(Activity.of(Activity.ActivityType.COMPETING, "SPRING"))
+                .addEventListeners(waiter)
                 .build()
                 .awaitReady();
+    }
+
+    @Bean
+    public EventWaiter eventWaiter(){
+        return new EventWaiter();
     }
 
 }
