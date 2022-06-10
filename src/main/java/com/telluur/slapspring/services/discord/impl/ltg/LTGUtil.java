@@ -12,6 +12,8 @@ import java.util.Collections;
 import java.util.stream.Collectors;
 
 public class LTGUtil {
+
+    public static final String LTG_INTERACTABLE_PREFIX = "LTG:";
     public static final Color LTGSuccessColor = new Color(17, 128, 106);
     public static final Color LTGFailureColor = Color.RED;
 

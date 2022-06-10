@@ -27,8 +27,10 @@ import java.util.stream.Collectors;
 
 @Service
 public class LTGQuickSubscribeService extends ListenerAdapter {
-    private static final String QUICK_SUBSCRIBE_MENU_ID = "menu:qs";
-    private static final String QUICK_SUBSCRIBE_PREFIX = "qs:";
+
+    private static final String QUICK_SUBSCRIBE_PREFIX = LTGUtil.LTG_INTERACTABLE_PREFIX + "QS:";
+    private static final String QUICK_SUBSCRIBE_MENU_ID = LTGUtil.LTG_INTERACTABLE_PREFIX + "QS:MENU";
+
     private static final Button INFO_BUTTON = Button.link("https://discord.com/channels/276858200853184522/596030791214170112/663754415504752650", "What's this?");
 
     private static final String SUBSCRIBE_ACTION_TEXT = "Subscribe to %s";
