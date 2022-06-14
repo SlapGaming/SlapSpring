@@ -20,7 +20,7 @@ public class PruneChatSlashCommand implements ICommand {
     public static final String OPTION_LIMIT_NAME = "number";
     public static final String OPTION_LIMIT_DESCRIPTION = "The number of messages to delete";
 
-    private static final OptionData limitOption = new OptionData(OptionType.INTEGER, OPTION_LIMIT_NAME, OPTION_LIMIT_DESCRIPTION, true).setRequiredRange(1, 200);
+    private static final OptionData limitOption = new OptionData(OptionType.INTEGER, OPTION_LIMIT_NAME, OPTION_LIMIT_DESCRIPTION, true).setRequiredRange(1, 100);
     private static final CommandData commandData = Commands.slash(COMMAND_NAME, COMMAND_DESCRIPTION)
             .addOptions(limitOption)
             .setDefaultEnabled(false);
@@ -36,7 +36,7 @@ public class PruneChatSlashCommand implements ICommand {
 
         Integer limit = event.getOption(OPTION_LIMIT_NAME, null, OptionMapping::getAsInt);
 
-        if (limit == null || limit < 1 || limit > 200) {
+        if (limit == null || limit < 1 || limit > 100) {
             event.getHook().sendMessage("Please provide a valid limit between 1-200").queue();
             return;
         }

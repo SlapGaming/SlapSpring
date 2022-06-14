@@ -103,11 +103,11 @@ public class LTGQuickSubscribeService extends ListenerAdapter {
 
     @Override
     public void onButtonInteraction(@Nonnull ButtonInteractionEvent event) {
-        event.deferReply(true).queue();
-
         String buttonId = event.getButton().getId();
         if (buttonId != null && buttonId.startsWith(QUICK_SUBSCRIBE_PREFIX)) {
-            String id = buttonId.substring(3); //Splits off the QUICK_SUBSCRIBE_PREFIX from the following ID
+            event.deferReply(true).queue();
+
+            String id = buttonId.substring(QUICK_SUBSCRIBE_PREFIX.length()); //Splits off the QUICK_SUBSCRIBE_PREFIX from the following ID
             Role role = botSession.getBoundGuild().getRoleById(id);
             Member member = event.getMember();
 
