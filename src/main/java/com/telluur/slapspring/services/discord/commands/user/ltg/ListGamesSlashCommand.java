@@ -5,7 +5,8 @@ import com.telluur.slapspring.model.ltg.LTGGameRepository;
 import com.telluur.slapspring.services.discord.BotSession;
 import com.telluur.slapspring.services.discord.commands.ICommand;
 import com.telluur.slapspring.services.discord.impl.ltg.LTGUtil;
-import com.telluur.slapspring.services.discord.util.TextUtil;
+import com.telluur.slapspring.services.discord.util.DiscordUtil;
+import com.telluur.slapspring.services.discord.util.paginator.IPaginator;
 import lombok.AllArgsConstructor;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.MessageBuilder;
@@ -27,40 +28,20 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.function.IntFunction;
 import java.util.stream.Collectors;
 
 
 @Service
-public class ListGamesSlashCommand extends ListenerAdapter implements ICommand {
+public class ListGamesSlashCommand extends ListenerAdapter implements ICommand, IPaginator {
     public static final String COMMAND_NAME = "listgames";
     public static final String COMMAND_DESCRIPTION = "Show all available Looking-To-Game roles.";
     private static final CommandData commandData = Commands.slash(COMMAND_NAME, COMMAND_DESCRIPTION).setDefaultEnabled(true);
-    private static final String PAGINATOR_BUTTON_PREFIX = LTGUtil.LTG_INTERACTABLE_PREFIX + "LG:PAGE:";
-
-    @AllArgsConstructor
-    private enum PAGINATOR_INDEX {
-        /*
-        Simplify arithmetic on paginator buttons.
-        Page index range: [0,)
-        Previous button index range [-1,)
-        Hard coded values for first (-2) and last (-3)
-         */
-        FIRST(-2),
-        LAST(-3);
-        private final int index;
-    }
-
+    private static final String LIST_GAMES_PAGINATOR_ID = "LISTGAMES";
     private static final int PAGE_SIZE = 10;
 
-    /**
-     * Maybe do this manually?
-     * The chewtils paginator seems kinda shit NGL
-     * <p>
-     * - Use a Spring PagingAndSortingRepo + Pageable to dynamically fetch the menu pages.
-     * - Timeout won't be neccesary for this as the buttons can hold persistent IDs, just a redraw on every button press.
-     * - Could still use the eventwaiter just for button timeout...
-     */
 
     @Autowired
     BotSession session;
@@ -119,18 +100,20 @@ public class ListGamesSlashCommand extends ListenerAdapter implements ICommand {
                                         game.getAbbreviation(),
                                         game.getFullName(),
                                         guild.getMembersWithRoles(entry.getValue()).size())
-                                .replace(' ', TextUtil.SPACE);
+                                .replace(' ', DiscordUtil.NO_BREAK_SPACE);
                     }).collect(Collectors.joining("\r\n"));
 
-            int currentPage = games.getNumber();
-            int totalPages = games.getTotalPages();
+
 
             MessageEmbed me = new EmbedBuilder()
-                    .setColor(LTGUtil.LTGSuccessColor)
+                    .setColor(LTGUtil.LTG_SUCCESS_COLOR)
                     .setTitle(String.format("All %d Looking-To-Game roles", totalGames))
                     .setDescription(gamesList)
                     .setFooter("Use /gameinfo to see individual subscribers.") //0 indexed
                     .build();
+
+            int currentPage = games.getNumber();
+            int totalPages = games.getTotalPages();
 
 
             //Create back buttons, disable if on first page
@@ -190,4 +173,45 @@ public class ListGamesSlashCommand extends ListenerAdapter implements ICommand {
         Pageable ltgPageable = PageRequest.of(safeIndex, PAGE_SIZE, Sort.by("abbreviation"));
         return repo.findAll(ltgPageable);
     }
+
+
+    @Override
+    public IntFunction<MessageEmbed> getPageProvider() {
+        return (index) -> {
+            Guild guild = session.getBoundGuild();
+
+
+            Page<LTGGame> games = fetchPage(index);
+
+            MessageEmbed me;
+            if (games.hasContent()) {
+                long totalGames = games.getTotalElements();
+
+
+                String gamesList = games.get().map(ltgGame -> new HashMap.SimpleEntry<>(ltgGame, guild.getRoleById(ltgGame.getId())))
+                        .filter(entry -> entry.getValue() != null)
+                        .map(entry -> {
+                            LTGGame game = entry.getKey();
+                            return String.format(
+                                            "`%-6s │ %-40s │ %2d subs`",
+                                            game.getAbbreviation(),
+                                            game.getFullName(),
+                                            guild.getMembersWithRoles(entry.getValue()).size())
+                                    .replace(' ', DiscordUtil.NO_BREAK_SPACE);
+                        }).collect(Collectors.joining("\r\n"));
+
+                MessageEmbed me = new EmbedBuilder()
+                        .setColor(LTGUtil.LTG_SUCCESS_COLOR)
+                        .setTitle(String.format("All %d Looking-To-Game roles", totalGames))
+                        .setDescription(gamesList)
+                        .setFooter("Use /gameinfo to see individual subscribers.") //0 indexed
+                        .build();
+
+            } else {
+                gamesList = Collections.emptyList();
+            }
+            return me;
+        };
+    }
 }
+

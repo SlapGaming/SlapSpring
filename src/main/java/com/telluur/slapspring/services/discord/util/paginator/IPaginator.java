@@ -1,25 +1,18 @@
 package com.telluur.slapspring.services.discord.util.paginator;
 
+import lombok.AllArgsConstructor;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.springframework.lang.NonNull;
 
-import java.util.Collection;
+import java.util.function.IntFunction;
 
 
 public interface IPaginator {
     @NonNull
-    String getPaginatorButtonPrefix();
+    String getPaginatorId();
 
-    int getPaginatorPageSize();
-
-    @NonNull
-    String getEmbedHeaderText();
+    int getNumberOfTotalPages();
 
     @NonNull
-    String getEmbedFooterText();
-
-    @NonNull
-    Collection<String> providePage(int index);
-
-
-
+    IntFunction<MessageEmbed> getPageProvider();
 }
