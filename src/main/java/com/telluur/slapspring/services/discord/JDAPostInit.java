@@ -1,6 +1,7 @@
 package com.telluur.slapspring.services.discord;
 
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.slf4j.Logger;
@@ -14,9 +15,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Configuration
+@Slf4j
 public class JDAPostInit {
-
-    private final Logger logger = LoggerFactory.getLogger(JDAPostInit.class);
     @Autowired
     List<ListenerAdapter> listeners;
     @Autowired
@@ -25,7 +25,7 @@ public class JDAPostInit {
 
     @PostConstruct
     public void attachListeners() {
-        logger.info("Attaching listeners: {}", listeners.stream()
+        log.info("Attaching listeners: {}", listeners.stream()
                 .map(listenerAdapter -> listenerAdapter.getClass().getSimpleName())
                 .collect(Collectors.toList())
         );
