@@ -32,7 +32,7 @@ public interface IPaginator {
      *
      * @return number of pages
      */
-    int getNumberOfTotalPages();
+    int getNumberOfTotalPages(String data);
 
     /**
      * Return a MessageEmbed with the content expected for the passed index number.
@@ -42,6 +42,7 @@ public interface IPaginator {
      * @param index 0 indexed number
      * @return Page content
      */
+    //TODO Allow this method to throw, so the PaginatorService can remove the buttons
     @NonNull
-    MessageEmbed getPage(int index);
+    MessageEmbed paginate(String data, int index);
 }

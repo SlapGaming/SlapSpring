@@ -1,4 +1,4 @@
-package com.telluur.slapspring.services.discord.commands.user.ltg;
+package com.telluur.slapspring.services.discord.commands.user.ltg.listgames;
 
 import com.telluur.slapspring.model.ltg.LTGGame;
 import com.telluur.slapspring.model.ltg.LTGGameRepository;
@@ -60,7 +60,7 @@ public class ListGamesSlashCommand extends ListenerAdapter implements ICommand, 
      * @return number of pages
      */
     @Override
-    public int getNumberOfTotalPages() {
+    public int getNumberOfTotalPages(String ignored) {
         int count = getNumberOfTotalGames();
         int pages = count / PAGE_SIZE; //int division
         if (count % PAGE_SIZE > 0) {
@@ -84,21 +84,23 @@ public class ListGamesSlashCommand extends ListenerAdapter implements ICommand, 
     public void handle(SlashCommandInteractionEvent event) {
         event.deferReply().queue();
         int startIndex = 0;
-        Message paginatorMessage = PaginatorService.createPaginatorMessage(LIST_GAMES_PAGINATOR_ID,
+        Message paginatorMessage = PaginatorService.createPaginatorMessage(
+                paginate(null, startIndex),
+                LIST_GAMES_PAGINATOR_ID,
+                null, //No need for persistent data passing
                 startIndex,
-                getNumberOfTotalPages(),
-                getPage(startIndex));
+                getNumberOfTotalPages(null));
         event.getHook().sendMessage(paginatorMessage).queue();
     }
 
 
     @Override
     @NonNull
-    public MessageEmbed getPage(int index) {
+    public MessageEmbed paginate(String ignored, int index) {
         Guild guild = session.getBoundGuild();
 
         int count = getNumberOfTotalGames();
-        int lastIndex = getNumberOfTotalPages() - 1;
+        int lastIndex = getNumberOfTotalPages(null) - 1;
 
         /*
         Make sure we always get an index with content; either round to first or last page.

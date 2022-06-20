@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
@@ -27,7 +28,9 @@ import java.util.regex.Pattern;
  * <p>
  * <p>
  * The IDs set on the discord buttons pass persistent state on the requested paginator, and the requested page.
- * Paginator ID stucture: "PAGINATOR:[id]:[index]"
+ * Paginator ID stucture: "PAGINATOR:[id]:[data]:[index]"
+ * [id] hardcoded ID for a specific iPaginator
+ * [data] allows for passing arbitrary data
  * [index] might contain hardcoded string values for the first/last page, or a positive integer.
  */
 
@@ -40,12 +43,13 @@ public class PaginatorService extends ListenerAdapter {
     private static final String ANY_EXCLUDING_COLON_REGEX = "[^:]+?";
     private static final String INTEGER_REGEX = "\\d+?";
 
-    private static final Pattern FULL_BUTTON_REGEX = Pattern.compile(String.format("%s:(%s):(%s|%s|%s)",
-            PAGINATOR_PREFIX,
-            ANY_EXCLUDING_COLON_REGEX,
-            INTEGER_REGEX,
-            PAGINATOR_FIRST_PAGE_INDEX,
-            PAGINATOR_LAST_PAGE_INDEX));
+    private static final Pattern FULL_BUTTON_REGEX = Pattern.compile(String.format("%s:(%s):(%s):(%s|%s|%s)",
+            PAGINATOR_PREFIX, //paginator indicator
+            ANY_EXCLUDING_COLON_REGEX, //[id]
+            ANY_EXCLUDING_COLON_REGEX, //[data]
+            INTEGER_REGEX, //[index]
+            PAGINATOR_FIRST_PAGE_INDEX, //[index]
+            PAGINATOR_LAST_PAGE_INDEX)); //[index]
 
 
     private final HashMap<String, IPaginator> paginators = new HashMap<>();
@@ -53,7 +57,7 @@ public class PaginatorService extends ListenerAdapter {
 
     public PaginatorService(@Autowired List<IPaginator> paginators) {
         log.info("Registering paginators: {}", paginators.stream()
-                .map(paginator -> String.format("%s [%s]", paginator.getClass().getSimpleName(), paginator.getPaginatorId()))
+                .map(paginator -> String.format("%s (%s)", paginator.getClass().getSimpleName(), paginator.getPaginatorId()))
                 .toList());
         paginators.forEach(ip -> this.paginators.put(ip.getPaginatorId(), ip));
     }
@@ -67,10 +71,14 @@ public class PaginatorService extends ListenerAdapter {
      * @param messageEmbed the content to attach the buttons to
      * @return a message containing the embed and ActionRow with first,prev,counter,next,last buttons.
      */
-    public static Message createPaginatorMessage(String paginatorId, int pageIndex, int totalPages, MessageEmbed messageEmbed) {
+    public static Message createPaginatorMessage(@Nonnull MessageEmbed messageEmbed, @Nonnull String paginatorId, @Nullable String data, int pageIndex, int totalPages) {
+        if (data == null) {
+            data = "NO-DATA";
+        }
+
         //Create back buttons, disable if on first page
-        Button firstBtn = Button.secondary(buildFirstButton(paginatorId), "\u21E4 First");
-        Button prevBtn = Button.secondary(buildButton(paginatorId, pageIndex - 1), "\u2190 Prev");
+        Button firstBtn = Button.secondary(buildFirstButton(paginatorId, data), "\u21E4 First");
+        Button prevBtn = Button.secondary(buildButton(paginatorId, data, pageIndex - 1), "\u2190 Prev");
         if (pageIndex == 0) {
             firstBtn = firstBtn.asDisabled();
             prevBtn = prevBtn.asDisabled();
@@ -80,8 +88,8 @@ public class PaginatorService extends ListenerAdapter {
         Button currBtn = Button.primary(DiscordUtil.ALWAYS_DISABLED_BUTTON_ID, String.format("Page %d/%d", pageIndex + 1, totalPages)).asDisabled();
 
         //Create next buttons, disable if on last page
-        Button nextBtn = Button.secondary(buildButton(paginatorId, pageIndex + 1), "Next \u2192");
-        Button lastBtn = Button.secondary(buildLastButton(paginatorId), "Last \u21E5");
+        Button nextBtn = Button.secondary(buildButton(paginatorId, data, pageIndex + 1), "Next \u2192");
+        Button lastBtn = Button.secondary(buildLastButton(paginatorId, data), "Last \u21E5");
         if (pageIndex >= (totalPages - 1)) {
             nextBtn = nextBtn.asDisabled();
             lastBtn = lastBtn.asDisabled();
@@ -91,8 +99,6 @@ public class PaginatorService extends ListenerAdapter {
 
     /**
      * CALLED BY JDA
-     *
-     *
      *
      * @param event
      */
@@ -109,20 +115,22 @@ public class PaginatorService extends ListenerAdapter {
                 Never null, since it passed the regex match.
                  */
                 String paginatorId = Objects.requireNonNull(matcher.group(1));
-                String indexString = Objects.requireNonNull(matcher.group(2));
+                String data = Objects.requireNonNull(matcher.group(2));
+                String indexString = Objects.requireNonNull(matcher.group(3));
 
                 if (paginators.containsKey(paginatorId)) {
                     IPaginator paginator = paginators.get(paginatorId);
 
+                    int totalPages = paginator.getNumberOfTotalPages(data);
+
                     int requestedIndex = switch (indexString) {
                         case PAGINATOR_FIRST_PAGE_INDEX -> 0;
-                        case PAGINATOR_LAST_PAGE_INDEX -> paginator.getNumberOfTotalPages() - 1;
+                        case PAGINATOR_LAST_PAGE_INDEX -> totalPages - 1;
                         default -> Integer.parseInt(indexString); //Should never throw since it passed the regex match.
                     };
 
-                    MessageEmbed embed = paginator.getPage(requestedIndex);
-                    int totalPages = paginator.getNumberOfTotalPages();
-                    Message msg = createPaginatorMessage(paginatorId, requestedIndex, totalPages, embed);
+                    MessageEmbed embed = paginator.paginate(data, requestedIndex);
+                    Message msg = createPaginatorMessage(embed, paginatorId, data, requestedIndex, totalPages);
                     event.getHook().editOriginal(msg).queue();
                 } else {
                     MessageEmbed me = new EmbedBuilder()
@@ -151,8 +159,8 @@ public class PaginatorService extends ListenerAdapter {
      * @param index       the requested index target
      * @return formatted button id
      */
-    private static String buildButton(@Nonnull String paginatorId, int index) {
-        return String.format("%s:%s:%d", PAGINATOR_PREFIX, paginatorId, index);
+    private static String buildButton(@Nonnull String paginatorId, @Nonnull String data, int index) {
+        return String.format("%s:%s:%s:%d", PAGINATOR_PREFIX, paginatorId, data, index);
     }
 
     /**
@@ -161,8 +169,8 @@ public class PaginatorService extends ListenerAdapter {
      * @param paginatorId corresponding paginator
      * @return formatted button id
      */
-    private static String buildFirstButton(@Nonnull String paginatorId) {
-        return String.format("%s:%s:%s", PAGINATOR_PREFIX, paginatorId, PAGINATOR_FIRST_PAGE_INDEX);
+    private static String buildFirstButton(@Nonnull String paginatorId, @Nonnull String data) {
+        return String.format("%s:%s:%s:%s", PAGINATOR_PREFIX, paginatorId, data, PAGINATOR_FIRST_PAGE_INDEX);
     }
 
     /**
@@ -171,7 +179,7 @@ public class PaginatorService extends ListenerAdapter {
      * @param paginatorId corresponding paginator
      * @return formatted button id
      */
-    private static String buildLastButton(@Nonnull String paginatorId) {
-        return String.format("%s:%s:%s", PAGINATOR_PREFIX, paginatorId, PAGINATOR_LAST_PAGE_INDEX);
+    private static String buildLastButton(@Nonnull String paginatorId, @Nonnull String data) {
+        return String.format("%s:%s:%s:%s", PAGINATOR_PREFIX, paginatorId, data, PAGINATOR_LAST_PAGE_INDEX);
     }
 }

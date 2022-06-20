@@ -4,7 +4,7 @@ services:
   db:
     image: docker.io/mariadb:10.7
     container_name: slapbot_db
-    restart: always
+    restart: on-failure:3
     ports:
       - '127.0.0.1:3306:3306'
     env_file: app-dev.env
@@ -16,7 +16,7 @@ services:
       - db
     image: docker.io/phpmyadmin/phpmyadmin
     container_name: phpmyadmin
-    restart: always
+    restart: on-failure:3
     ports:
       - '127.0.0.1:8081:80'
     environment:

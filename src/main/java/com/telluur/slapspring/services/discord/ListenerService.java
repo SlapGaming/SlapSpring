@@ -1,27 +1,26 @@
 package com.telluur.slapspring.services.discord;
 
-import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * After construction of the JDA object, and the listeners depending on injection of the JDA bean,
+ * registers the listeners automatically to tje JDA bean using injection.
+ */
 @Configuration
 @Slf4j
-public class JDAPostInit {
+public class ListenerService {
     @Autowired
     List<ListenerAdapter> listeners;
     @Autowired
     private JDA jda;
-
 
     @PostConstruct
     public void attachListeners() {
