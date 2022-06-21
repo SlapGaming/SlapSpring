@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
@@ -62,40 +63,7 @@ public class PaginatorService extends ListenerAdapter {
         paginators.forEach(ip -> this.paginators.put(ip.getPaginatorId(), ip));
     }
 
-    /**
-     * Attaches paginator buttons to a MessageEmbed for a specific page
-     *
-     * @param paginatorId  the id corresponding to the paginator
-     * @param pageIndex    the index corresponding to the embed
-     * @param totalPages   the total number of pages available for this paginator
-     * @param messageEmbed the content to attach the buttons to
-     * @return a message containing the embed and ActionRow with first,prev,counter,next,last buttons.
-     */
-    public static Message createPaginatorMessage(@Nonnull MessageEmbed messageEmbed, @Nonnull String paginatorId, @Nullable String data, int pageIndex, int totalPages) {
-        if (data == null) {
-            data = "NO-DATA";
-        }
 
-        //Create back buttons, disable if on first page
-        Button firstBtn = Button.secondary(buildFirstButton(paginatorId, data), "\u21E4 First");
-        Button prevBtn = Button.secondary(buildButton(paginatorId, data, pageIndex - 1), "\u2190 Prev");
-        if (pageIndex == 0) {
-            firstBtn = firstBtn.asDisabled();
-            prevBtn = prevBtn.asDisabled();
-        }
-
-        //Create disabled button indicating the page number
-        Button currBtn = Button.primary(DiscordUtil.ALWAYS_DISABLED_BUTTON_ID, String.format("Page %d/%d", pageIndex + 1, totalPages)).asDisabled();
-
-        //Create next buttons, disable if on last page
-        Button nextBtn = Button.secondary(buildButton(paginatorId, data, pageIndex + 1), "Next \u2192");
-        Button lastBtn = Button.secondary(buildLastButton(paginatorId, data), "Last \u21E5");
-        if (pageIndex >= (totalPages - 1)) {
-            nextBtn = nextBtn.asDisabled();
-            lastBtn = lastBtn.asDisabled();
-        }
-        return new MessageBuilder(messageEmbed).setActionRows(ActionRow.of(firstBtn, prevBtn, currBtn, nextBtn, lastBtn)).build();
-    }
 
     /**
      * CALLED BY JDA
@@ -159,7 +127,7 @@ public class PaginatorService extends ListenerAdapter {
      * @param index       the requested index target
      * @return formatted button id
      */
-    private static String buildButton(@Nonnull String paginatorId, @Nonnull String data, int index) {
+    public static String buildButton(@Nonnull String paginatorId, @Nonnull String data, int index) {
         return String.format("%s:%s:%s:%d", PAGINATOR_PREFIX, paginatorId, data, index);
     }
 
@@ -169,7 +137,7 @@ public class PaginatorService extends ListenerAdapter {
      * @param paginatorId corresponding paginator
      * @return formatted button id
      */
-    private static String buildFirstButton(@Nonnull String paginatorId, @Nonnull String data) {
+    public static String buildFirstButton(@Nonnull String paginatorId, @Nonnull String data) {
         return String.format("%s:%s:%s:%s", PAGINATOR_PREFIX, paginatorId, data, PAGINATOR_FIRST_PAGE_INDEX);
     }
 
@@ -179,7 +147,7 @@ public class PaginatorService extends ListenerAdapter {
      * @param paginatorId corresponding paginator
      * @return formatted button id
      */
-    private static String buildLastButton(@Nonnull String paginatorId, @Nonnull String data) {
+    public static String buildLastButton(@Nonnull String paginatorId, @Nonnull String data) {
         return String.format("%s:%s:%s:%s", PAGINATOR_PREFIX, paginatorId, data, PAGINATOR_LAST_PAGE_INDEX);
     }
 }

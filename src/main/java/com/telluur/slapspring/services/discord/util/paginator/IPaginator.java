@@ -44,5 +44,5 @@ public interface IPaginator {
      */
     //TODO Allow this method to throw, so the PaginatorService can remove the buttons
     @NonNull
-    MessageEmbed paginate(String data, int index);
+    PaginatorPage paginate(String data, int index);
 }

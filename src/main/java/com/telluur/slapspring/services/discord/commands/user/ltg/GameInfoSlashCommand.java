@@ -1,12 +1,18 @@
 package com.telluur.slapspring.services.discord.commands.user.ltg;
 
+import com.telluur.slapspring.model.ltg.LTGGame;
 import com.telluur.slapspring.model.ltg.LTGGameRepository;
 import com.telluur.slapspring.services.discord.BotSession;
 import com.telluur.slapspring.services.discord.commands.ICommand;
+import com.telluur.slapspring.services.discord.commands.user.ltg.listgames.ListGamesSlashCommand;
 import com.telluur.slapspring.services.discord.impl.ltg.LTGUtil;
 import com.telluur.slapspring.services.discord.util.paginator.IPaginator;
 import com.telluur.slapspring.services.discord.util.paginator.PaginatorService;
-import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -18,8 +24,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class GameInfoSlashCommand implements ICommand, IPaginator {
@@ -59,7 +68,7 @@ public class GameInfoSlashCommand implements ICommand, IPaginator {
                     startingIndex,
                     getNumberOfTotalPages(role)
             );
-            event.getHook().sendMessageEmbeds(paginatorMessage).queue();
+            event.getHook().sendMessage(paginatorMessage).queue();
         } else {
             MessageEmbed me = LTGUtil.failureEmbed(String.format("%s is not a Looking-To-Game role.", role.getAsMention()));
             event.replyEmbeds(me).setEphemeral(true).queue();
@@ -99,15 +108,33 @@ public class GameInfoSlashCommand implements ICommand, IPaginator {
     public @NotNull MessageEmbed paginate(String data, int index) {
         Role role = parseData(data);
 
-        if(role != null && repository.existsById(role.getIdLong())){
-            getSubscribers(role).stream().sorted(
-                    (final Role r1, final Role r2) -> r1.getName().compareTo(r2.getName())
-            )
+        if (role != null) {
+            Optional<LTGGame> OptionalLTGGame = repository.findById(role.getIdLong());
+            if (OptionalLTGGame.isPresent()) {
+                String pageString = getSubscribers(role).stream()
+                        .sorted(Comparator.comparing(Member::getEffectiveName))
+                        .skip((long) index * PAGE_SIZE) //Skip items to get to the indexed page
+                        .limit((long) PAGE_SIZE) //Max 10 items
+                        .map(member -> String.format("- %s", member.getAsMention()))
+                        .collect(Collectors.joining("\r\n"));
 
-            return null;
-        }else{
-            LTGUtil.failureEmbed("Could not find the Looking-To-Game role. Has it been deleted?");
+                return new EmbedBuilder()
+                        .setColor(LTGUtil.LTG_SUCCESS_COLOR)
+                        .setTitle("Looking-To-Game Role Info")
+                        .setDescription(String.format("""
+                                        **Role:** %s
+                                        **Total subscribers:** `%d`
+                                        
+                                        **Subscribers:**                                
+                                        %s""",
+                                role.getAsMention(),
+                                getSubscribers(role).size(),
+                                pageString))
+                        .setFooter(String.format("Use /%s to see all Looking-To-Game roles.", ListGamesSlashCommand.COMMAND_NAME))
+                        .build();
+            }
         }
+        return LTGUtil.failureEmbed("Could not find the Looking-To-Game role. Has it been deleted?");
     }
 
     @Nullable

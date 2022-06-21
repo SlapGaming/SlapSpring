@@ -4,8 +4,8 @@ import com.telluur.slapspring.model.ltg.LTGGame;
 import com.telluur.slapspring.model.ltg.LTGGameRepository;
 import com.telluur.slapspring.services.discord.BotSession;
 import com.telluur.slapspring.services.discord.commands.ICommand;
+import com.telluur.slapspring.services.discord.commands.user.ltg.GameInfoSlashCommand;
 import com.telluur.slapspring.services.discord.impl.ltg.LTGUtil;
-import com.telluur.slapspring.services.discord.util.DiscordUtil;
 import com.telluur.slapspring.services.discord.util.paginator.IPaginator;
 import com.telluur.slapspring.services.discord.util.paginator.PaginatorService;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -24,7 +24,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 
@@ -117,6 +117,8 @@ public class ListGamesSlashCommand extends ListenerAdapter implements ICommand, 
         Page<LTGGame> games = repo.findAll(ltgPageable);
 
         if (games.hasContent()) {
+            /*
+            // Old tabulated style
             String gamesList = games.get().map(ltgGame -> new HashMap.SimpleEntry<>(ltgGame, guild.getRoleById(ltgGame.getId())))
                     .filter(entry -> entry.getValue() != null)
                     .map(entry -> {
@@ -128,12 +130,21 @@ public class ListGamesSlashCommand extends ListenerAdapter implements ICommand, 
                                         guild.getMembersWithRoles(entry.getValue()).size())
                                 .replace(' ', DiscordUtil.NO_BREAK_SPACE);
                     }).collect(Collectors.joining("\r\n"));
+             */
+
+            String gamesList = games.get()
+                    .map(ltgGame -> guild.getRoleById(ltgGame.getId()))
+                    .filter(Objects::nonNull)
+                    .map(role -> String.format("- %s [%d subscribers]",
+                            role.getAsMention(),
+                            guild.getMembersWithRoles(role).size()))
+                    .collect(Collectors.joining("\r\n"));
 
             return new EmbedBuilder()
                     .setColor(LTGUtil.LTG_SUCCESS_COLOR)
-                    .setTitle(String.format("All %d Looking-To-Game roles", count))
+                    .setTitle("Looking-To-Game Roles")
                     .setDescription(gamesList)
-                    .setFooter("Use /gameinfo to see individual subscribers.")
+                    .setFooter(String.format("Use /%s to see individual subscribers.", GameInfoSlashCommand.COMMAND_NAME))
                     .build();
         } else {
             return LTGUtil.failureEmbed("Uh-oh, somehow the page you requested was empty...");
