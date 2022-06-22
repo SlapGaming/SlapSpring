@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.components.Component;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.selections.SelectMenu;
 import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
@@ -53,8 +54,9 @@ public class LTGQuickSubscribeService extends ListenerAdapter {
         sendQuickSubscribeWithMessageBuilder(roles, new MessageBuilder().appendFormat("%s\r\n", message));
     }
 
+
     /**
-     * Sends a message to tx with buttons corresponding to the roles provided.
+     * Sends a message to LTG tx with buttons corresponding to the roles provided.
      * The buttons presses trigger the bot to add the role to the pressing user, this is handled in onButtonClick()
      * <p>
      * When 1 0r 2 valid LTG roles are supplied, two buttons are created,
@@ -63,27 +65,45 @@ public class LTGQuickSubscribeService extends ListenerAdapter {
      * @param roles the Roles the user will be able to join
      */
     private void sendQuickSubscribeWithMessageBuilder(Collection<Role> roles, @Nonnull MessageBuilder msgBuilder) {
-        List<LTGGame> ltgGames = roles.stream()
-                .distinct() //We only want unique roles.
-                .map(role -> repository.findById(role.getIdLong()))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .toList();
 
-        int size = ltgGames.size();
-        if (size <= 0) {
-            //Early return.
-            return;
-        } else if (size <= 2) {
+        Optional<ActionRow> opt = createQSActionRowWithRoles(roles);
+        if (opt.isPresent()) {
+            ActionRow ltgQuickSubActionRow = opt.get();
+            if (ltgQuickSubActionRow.getType().equals(Component.Type.SELECT_MENU)) {
+                msgBuilder.append("Select the Looking-To-Game roles you wish to join from the dropdown.")
+                        .setActionRows(ltgQuickSubActionRow, ActionRow.of(INFO_BUTTON))
+                        .build();
+            } else {
+                msgBuilder.append("Use the buttons below to join Looking-To-Game roles.")
+                        .setActionRows(ltgQuickSubActionRow)
+                        .build();
+            }
+            botSession.getLTGTX().sendMessage(msgBuilder.build()).queue();
+        }
+    }
+
+    /**
+     * Creates the ActionRows for the quick subscribe buttons
+     * The buttons presses trigger the bot to add the corresponding role to the pressing user, this is handled in onButtonClick()
+     * <p>
+     * When 1 0r 2 valid LTG roles are supplied, two buttons are created,
+     * When more than 2 valid LTG roles are supplied, we create a dropdown menu instead.
+     *
+     * @param ltgGames the ltgGames the user will be able to join. This does not check whether the corresponding discord role still exists.
+     * @return Optional ActionRow, might return when empty when no valid LTG roles were provided, or more than 25 LTG roles.
+     */
+    public Optional<ActionRow> createQSActionRowWithLTGGames(Collection<LTGGame> ltgGames) {
+        if (ltgGames == null || ltgGames.size() <= 0 || ltgGames.size() > 25) {
+            return Optional.empty();
+        } else if (ltgGames.size() == 1 || ltgGames.size() == 2) {
             //We create 2 LTG buttons and the info button.
             List<Button> buttons = ltgGames.stream().map(ltgGame -> Button.primary(
                     String.format("%s%d", QUICK_SUBSCRIBE_PREFIX, ltgGame.getId()),
                     String.format(SUBSCRIBE_ACTION_TEXT, ltgGame.getAbbreviation()))
             ).collect(Collectors.toList());
             buttons.add(INFO_BUTTON);
-            msgBuilder.append("Hit the buttons below to join LTG roles.")
-                    .setActionRows(ActionRow.of(buttons));
-        } else { //25 is the max number of options in a select menu
+            return Optional.of(ActionRow.of(buttons));
+        } else { //More than 2, but 25 or less roles.
             //We create a dropdown list instead.
             List<SelectOption> options = ltgGames.stream().map(ltgGame -> SelectOption.of(
                     String.format(SUBSCRIBE_ACTION_TEXT, ltgGame.getAbbreviation()),
@@ -93,11 +113,32 @@ public class LTGQuickSubscribeService extends ListenerAdapter {
                     .addOptions(options)
                     .setMaxValues(25)
                     .build());
-
-            msgBuilder.append("Select the LTG roles you wish to join.")
-                    .setActionRows(ltgSelect, ActionRow.of(INFO_BUTTON));
+            return Optional.of(ltgSelect);
         }
-        botSession.getLTGTX().sendMessage(msgBuilder.build()).queue();
+    }
+
+    /**
+     * Creates the ActionRows for the quick subscribe buttons
+     * The buttons presses trigger the bot to add the role to the pressing user, this is handled in onButtonClick()
+     * <p>
+     * When 1 0r 2 valid LTG roles are supplied, two buttons are created,
+     * When more than 2 valid LTG roles are supplied, we create a dropdown menu instead.
+     *
+     * @param roles the discord roles the user will be able to join. Non-LTG roles are filtered.
+     * @return Optional ActionRow, might return when empty when no valid LTG roles were provided, or more than 25 LTG roles.
+     */
+    public Optional<ActionRow> createQSActionRowWithRoles(Collection<Role> roles) {
+        if (roles == null) {
+            return Optional.empty();
+        } else {
+            List<LTGGame> ltgGames = roles.stream()
+                    .distinct() //We only want unique roles.
+                    .map(role -> repository.findById(role.getIdLong()))
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .toList();
+            return createQSActionRowWithLTGGames(ltgGames);
+        }
     }
 
 

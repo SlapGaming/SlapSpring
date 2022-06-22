@@ -11,6 +11,7 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 
 @Service
@@ -25,13 +26,14 @@ public class PruneChatSlashCommand implements ICommand {
             .addOptions(limitOption)
             .setDefaultEnabled(false);
 
+    @Nonnull
     @Override
     public CommandData data() {
         return commandData;
     }
 
     @Override
-    public void handle(SlashCommandInteractionEvent event) {
+    public void handle(@Nonnull SlashCommandInteractionEvent event) {
         event.deferReply(true).queue();
 
         Integer limit = event.getOption(OPTION_LIMIT_NAME, null, OptionMapping::getAsInt);

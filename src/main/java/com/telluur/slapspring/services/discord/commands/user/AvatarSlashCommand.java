@@ -1,4 +1,4 @@
-package com.telluur.slapspring.services.discord.commands.user.avatar;
+package com.telluur.slapspring.services.discord.commands.user;
 
 import com.telluur.slapspring.services.discord.commands.ICommand;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Nonnull;
 import java.awt.*;
 import java.util.Objects;
 
@@ -35,13 +36,14 @@ public class AvatarSlashCommand implements ICommand {
     private static final CommandData commandData = Commands.slash(COMMAND_NAME, COMMAND_DESCRIPTION)
             .addOptions(memberOption, typeOption).setDefaultEnabled(true);
 
+    @Nonnull
     @Override
     public CommandData data() {
         return commandData;
     }
 
     @Override
-    public void handle(SlashCommandInteractionEvent event) {
+    public void handle(@Nonnull SlashCommandInteractionEvent event) {
         event.deferReply().queue();
 
         //Validated by the discord frontend.

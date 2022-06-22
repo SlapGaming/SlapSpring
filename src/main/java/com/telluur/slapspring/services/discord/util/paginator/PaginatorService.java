@@ -9,19 +9,16 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
+import static com.telluur.slapspring.services.discord.util.paginator.PaginatorButtonUtil.*;
 
 /**
  * Single listener implementation for a generic paginator service.
@@ -38,20 +35,6 @@ import java.util.regex.Pattern;
 @Service
 @Slf4j
 public class PaginatorService extends ListenerAdapter {
-    private static final String PAGINATOR_PREFIX = "PAGINATOR";
-    private static final String PAGINATOR_FIRST_PAGE_INDEX = "FIRST";
-    private static final String PAGINATOR_LAST_PAGE_INDEX = "LAST";
-    private static final String ANY_EXCLUDING_COLON_REGEX = "[^:]+?";
-    private static final String INTEGER_REGEX = "\\d+?";
-
-    private static final Pattern FULL_BUTTON_REGEX = Pattern.compile(String.format("%s:(%s):(%s):(%s|%s|%s)",
-            PAGINATOR_PREFIX, //paginator indicator
-            ANY_EXCLUDING_COLON_REGEX, //[id]
-            ANY_EXCLUDING_COLON_REGEX, //[data]
-            INTEGER_REGEX, //[index]
-            PAGINATOR_FIRST_PAGE_INDEX, //[index]
-            PAGINATOR_LAST_PAGE_INDEX)); //[index]
-
 
     private final HashMap<String, IPaginator> paginators = new HashMap<>();
 
@@ -64,11 +47,8 @@ public class PaginatorService extends ListenerAdapter {
     }
 
 
-
     /**
      * CALLED BY JDA
-     *
-     * @param event
      */
     @Override
     public void onButtonInteraction(@Nonnull ButtonInteractionEvent event) {
@@ -97,17 +77,16 @@ public class PaginatorService extends ListenerAdapter {
                         default -> Integer.parseInt(indexString); //Should never throw since it passed the regex match.
                     };
 
-                    MessageEmbed embed = paginator.paginate(data, requestedIndex);
-                    Message msg = createPaginatorMessage(embed, paginatorId, data, requestedIndex, totalPages);
-                    event.getHook().editOriginal(msg).queue();
+                    Message msg = null;
+                    try {
+                        msg = paginator.paginate(data, requestedIndex).toDiscordMessage();
+                        event.getHook().editOriginal(msg).queue();
+                    } catch (PaginatorException e) {
+                        removePaginatorWithError(event, e.getMessage());
+                    }
+
                 } else {
-                    MessageEmbed me = new EmbedBuilder()
-                            .setColor(DiscordUtil.ERROR_COLOR)
-                            .setTitle("Paginator error!")
-                            .setDescription("Uh-oh, the button was recognized as a paginator, but failed to find the page content.")
-                            .build();
-                    Message msg = new MessageBuilder(me).build(); //removes the buttons.
-                    event.getHook().editOriginal(msg).queue();
+                    removePaginatorWithError(event, "Uh-oh, the button was recognized as a paginator, but failed to find the page content.");
                 }
             }
             //omitted else: id is not a paginator, not intended for this ListenerAdapter
@@ -115,39 +94,14 @@ public class PaginatorService extends ListenerAdapter {
         //omitted else: id is null, not intended for this ListenerAdapter
     }
 
-
-    /*
-    Utility methods
-     */
-
-    /**
-     * Builds a button for a paginator with target index
-     *
-     * @param paginatorId corresponding paginator
-     * @param index       the requested index target
-     * @return formatted button id
-     */
-    public static String buildButton(@Nonnull String paginatorId, @Nonnull String data, int index) {
-        return String.format("%s:%s:%s:%d", PAGINATOR_PREFIX, paginatorId, data, index);
+    private void removePaginatorWithError(@Nonnull ButtonInteractionEvent event, @Nonnull String message) {
+        MessageEmbed me = new EmbedBuilder()
+                .setColor(DiscordUtil.ERROR_COLOR)
+                .setTitle("Paginator error!")
+                .setDescription("Uh-oh, the button was recognized as a paginator, but failed to find the page content.")
+                .build();
+        Message msg = new MessageBuilder(me).build(); //removes the buttons.
+        event.getHook().editOriginal(msg).queue();
     }
 
-    /**
-     * Builds a button for a paginator with target index set to first
-     *
-     * @param paginatorId corresponding paginator
-     * @return formatted button id
-     */
-    public static String buildFirstButton(@Nonnull String paginatorId, @Nonnull String data) {
-        return String.format("%s:%s:%s:%s", PAGINATOR_PREFIX, paginatorId, data, PAGINATOR_FIRST_PAGE_INDEX);
-    }
-
-    /**
-     * Builds a button for a paginator with target index set to last
-     *
-     * @param paginatorId corresponding paginator
-     * @return formatted button id
-     */
-    public static String buildLastButton(@Nonnull String paginatorId, @Nonnull String data) {
-        return String.format("%s:%s:%s:%s", PAGINATOR_PREFIX, paginatorId, data, PAGINATOR_LAST_PAGE_INDEX);
-    }
 }

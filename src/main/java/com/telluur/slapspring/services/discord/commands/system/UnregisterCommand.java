@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Nonnull;
 import java.util.Objects;
 
 @Service
@@ -17,6 +18,7 @@ public class UnregisterCommand extends AbstractSystemCommand {
     private static final CommandData commandData = Commands.slash(COMMAND_NAME, COMMAND_DESCRIPTION)
             .setDefaultEnabled(false);
 
+    @Nonnull
     @Override
     public CommandData data() {
         return commandData;

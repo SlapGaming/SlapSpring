@@ -1,49 +1,41 @@
 package com.telluur.slapspring.services.discord.util.paginator;
 
 import com.telluur.slapspring.services.discord.util.DiscordUtil;
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 
-import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.LinkedList;
 
-import static com.telluur.slapspring.services.discord.util.paginator.PaginatorService.*;
+import static com.telluur.slapspring.services.discord.util.paginator.PaginatorButtonUtil.*;
 
 
-@Data
-@RequiredArgsConstructor
+@Getter
+@Builder(builderClassName = "Builder", access = AccessLevel.PUBLIC)
 public class PaginatorPage {
-
-    private @Nonnull String paginatorId;
-    private String data;
-    private int index, totalPages;
-    private @Nonnull MessageEmbed messageEmbed;
-    private Collection<ActionRow> additionalActionRows;
-
+    private final @NonNull String paginatorId;
+    private final @Nullable String data;
+    private final int index, totalPages;
+    private final @NonNull MessageEmbed messageEmbed;
+    @Singular
+    private final @Nullable Collection<ActionRow> additionalActionRows;
 
     /**
      * Attaches paginator buttons to a MessageEmbed for a specific page
      *
-     * @param paginatorId  the id corresponding to the paginator
-     * @param pageIndex    the index corresponding to the embed
-     * @param totalPages   the total number of pages available for this paginator
-     * @param messageEmbed the content to attach the buttons to
      * @return a message containing the embed and ActionRow with first,prev,counter,next,last buttons.
      */
-    public Message build() {
-        if (data == null) {
-            data = "_";
-        }
+    public Message toDiscordMessage() {
+        String safeData = data != null ? data : "_";
 
         //Create back buttons, disable if on first page
-        Button firstBtn = Button.secondary(buildFirstButton(paginatorId, data), "\u21E4 First");
-        Button prevBtn = Button.secondary(buildButton(paginatorId, data, index - 1), "\u2190 Prev");
+        Button firstBtn = Button.secondary(buildFirstButton(paginatorId, safeData), "\u21E4 First");
+        Button prevBtn = Button.secondary(buildButton(paginatorId, safeData, index - 1), "\u2190 Prev");
         if (index == 0) {
             firstBtn = firstBtn.asDisabled();
             prevBtn = prevBtn.asDisabled();
@@ -53,8 +45,8 @@ public class PaginatorPage {
         Button currBtn = Button.primary(DiscordUtil.ALWAYS_DISABLED_BUTTON_ID, String.format("Page %d/%d", index + 1, totalPages)).asDisabled();
 
         //Create next buttons, disable if on last page
-        Button nextBtn = Button.secondary(buildButton(paginatorId, data, index + 1), "Next \u2192");
-        Button lastBtn = Button.secondary(buildLastButton(paginatorId, data), "Last \u21E5");
+        Button nextBtn = Button.secondary(buildButton(paginatorId, safeData, index + 1), "Next \u2192");
+        Button lastBtn = Button.secondary(buildLastButton(paginatorId, safeData), "Last \u21E5");
         if (index >= (totalPages - 1)) {
             nextBtn = nextBtn.asDisabled();
             lastBtn = lastBtn.asDisabled();

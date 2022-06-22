@@ -22,8 +22,8 @@ public class LTGGame {
     @Id
     private long id;
 
-    @NonNull
-    private String abbreviation, fullName;
+
+    private @NonNull String abbreviation, fullName;
 
     private String description;
 }

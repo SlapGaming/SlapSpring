@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Nonnull;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
@@ -26,6 +27,7 @@ public class EvalCommand extends AbstractSystemCommand {
     @Autowired
     private BotSession botSession;
 
+    @Nonnull
     @Override
     public CommandData data() {
         return commandData;

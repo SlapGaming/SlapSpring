@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Nonnull;
 import java.util.Random;
 
 @Service
@@ -25,6 +26,7 @@ public class RollSlashCommand implements ICommand {
 
     private final Random rand = new Random();
 
+    @Nonnull
     @Override
     public CommandData data() {
         return commandData;
@@ -32,7 +34,7 @@ public class RollSlashCommand implements ICommand {
 
 
     @Override
-    public void handle(SlashCommandInteractionEvent event) {
+    public void handle(@Nonnull SlashCommandInteractionEvent event) {
         event.deferReply().queue();
         Integer bound = event.getOption(OPTION_BOUND_NAME, 100, OptionMapping::getAsInt);
 

@@ -35,7 +35,7 @@ public class SlapSpringApplication {
     }
 
     @Bean
-    public EventWaiter eventWaiter(){
+    public EventWaiter eventWaiter() {
         return new EventWaiter();
     }
 

@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.IntStream;
@@ -45,13 +46,14 @@ public class UnsubscribeSlashCommand implements ICommand {
     @Autowired
     Logger ltgLogger;
 
+    @Nonnull
     @Override
     public CommandData data() {
         return commandData;
     }
 
     @Override
-    public void handle(SlashCommandInteractionEvent event) {
+    public void handle(@Nonnull SlashCommandInteractionEvent event) {
         event.deferReply(true).queue();
 
         List<Role> roles = IntStream.range(1, 26)

@@ -42,13 +42,14 @@ public class AddGameSlashCommand extends ListenerAdapter implements ICommand {
     @Autowired
     Logger ltgLogger;
 
+    @Nonnull
     @Override
     public CommandData data() {
         return commandData;
     }
 
     @Override
-    public void handle(SlashCommandInteractionEvent event) {
+    public void handle(@Nonnull SlashCommandInteractionEvent event) {
         TextInput abbrv = TextInput.create(MODAL_ABBRV, "Abbreviation", TextInputStyle.SHORT)
                 .setRequired(true)
                 .setRequiredRange(1, 6)

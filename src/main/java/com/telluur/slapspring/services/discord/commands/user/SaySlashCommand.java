@@ -8,6 +8,8 @@ import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Nonnull;
+
 @Service
 public class SaySlashCommand implements ICommand {
     public static final String COMMAND_NAME = "say";
@@ -20,6 +22,7 @@ public class SaySlashCommand implements ICommand {
             .setDefaultEnabled(false);
 
 
+    @Nonnull
     @Override
     public CommandData data() {
         return commandData;
@@ -27,7 +30,7 @@ public class SaySlashCommand implements ICommand {
 
 
     @Override
-    public void handle(SlashCommandInteractionEvent event) {
+    public void handle(@Nonnull SlashCommandInteractionEvent event) {
         event.deferReply(true).queue();
         String payload = event.getOption(OPTION_MESSAGE_NAME, OptionMapping::getAsString);
         if (payload == null) {

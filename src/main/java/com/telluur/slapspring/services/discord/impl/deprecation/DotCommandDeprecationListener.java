@@ -3,17 +3,14 @@ package com.telluur.slapspring.services.discord.impl.deprecation;
 import com.telluur.slapspring.services.discord.commands.system.EvalCommand;
 import com.telluur.slapspring.services.discord.commands.system.KillCommand;
 import com.telluur.slapspring.services.discord.commands.user.*;
-import com.telluur.slapspring.services.discord.commands.user.avatar.AvatarSlashCommand;
-import com.telluur.slapspring.services.discord.commands.user.ltg.AddGameSlashCommand;
-import com.telluur.slapspring.services.discord.commands.user.ltg.SubscribeSlashCommand;
-import com.telluur.slapspring.services.discord.commands.user.ltg.UnsubscribeSlashCommand;
+import com.telluur.slapspring.services.discord.commands.user.ltg.*;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Nonnull;
 import java.awt.*;
 import java.util.List;
 import java.util.Map;
@@ -36,12 +33,12 @@ public class DotCommandDeprecationListener extends ListenerAdapter {
             entry("clear", PruneChatSlashCommand.COMMAND_NAME),
 
             entry("say", SaySlashCommand.COMMAND_NAME),
-            //TODO
-            entry("games", "UNIMPLEMENTED"),
 
-            entry("info", "UNIMPLEMENTRED"),
-            entry("subscriptions", "UNIMPLEMENTRED"),
-            entry("subs", "UNIMPLEMENTRED"),
+            entry("games", ListGamesSlashCommand.COMMAND_NAME),
+
+            entry("info", GameInfoSlashCommand.COMMAND_NAME),
+            entry("subscriptions", GameInfoSlashCommand.COMMAND_NAME),
+            entry("subs", GameInfoSlashCommand.COMMAND_NAME),
 
             entry("addgame", AddGameSlashCommand.COMMAND_NAME),
 
@@ -68,7 +65,7 @@ public class DotCommandDeprecationListener extends ListenerAdapter {
 
 
     @Override
-    public void onMessageReceived(@NotNull MessageReceivedEvent event) {
+    public void onMessageReceived(@Nonnull MessageReceivedEvent event) {
         String contentDisplay = event.getMessage().getContentDisplay();
         for (String prefix : deprecatedPrefixes) {
             if (contentDisplay.startsWith(prefix)) {

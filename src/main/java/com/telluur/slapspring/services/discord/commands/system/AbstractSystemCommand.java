@@ -5,6 +5,8 @@ import com.telluur.slapspring.services.discord.commands.ICommand;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Nonnull;
+
 abstract class AbstractSystemCommand implements ICommand {
     @Autowired
     BotProperties botProperties;
@@ -16,7 +18,7 @@ abstract class AbstractSystemCommand implements ICommand {
      * @param event InteractionEvent dispatched by discord
      */
     @Override
-    public void handle(SlashCommandInteractionEvent event) {
+    public void handle(@Nonnull SlashCommandInteractionEvent event) {
         if (botProperties.system_users().contains(event.getUser().getId())) {
             systemHandle(event);
         } else {

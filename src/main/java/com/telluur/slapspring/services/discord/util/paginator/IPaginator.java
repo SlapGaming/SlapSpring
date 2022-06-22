@@ -1,8 +1,7 @@
 package com.telluur.slapspring.services.discord.util.paginator;
 
 
-import net.dv8tion.jda.api.entities.MessageEmbed;
-import org.springframework.lang.NonNull;
+import javax.annotation.Nonnull;
 
 /**
  * This interface houses the required methods for constructing a pageable MessageEmbed.
@@ -23,7 +22,7 @@ public interface IPaginator {
      *
      * @return paginator ID
      */
-    @NonNull
+    @Nonnull
     String getPaginatorId();
 
     /**
@@ -43,6 +42,6 @@ public interface IPaginator {
      * @return Page content
      */
     //TODO Allow this method to throw, so the PaginatorService can remove the buttons
-    @NonNull
-    PaginatorPage paginate(String data, int index);
+    @Nonnull
+    PaginatorPage paginate(String data, int index) throws PaginatorException;
 }

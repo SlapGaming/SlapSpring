@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Nonnull;
+
 @Service
 public class KillCommand extends AbstractSystemCommand {
     public static final String COMMAND_NAME = "kill";
@@ -16,6 +18,7 @@ public class KillCommand extends AbstractSystemCommand {
     @Autowired
     private ConfigurableApplicationContext springApplication;
 
+    @Nonnull
     @Override
     public CommandData data() {
         return commandData;

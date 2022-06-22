@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Nonnull;
 import java.util.Random;
 
 @Service
@@ -38,13 +39,14 @@ public class PingSlashCommand implements ICommand {
     };
     private final Random random = new Random();
 
+    @Nonnull
     @Override
     public CommandData data() {
         return commandData;
     }
 
     @Override
-    public void handle(SlashCommandInteractionEvent event) {
+    public void handle(@Nonnull SlashCommandInteractionEvent event) {
         event.deferReply(true).queue();
         long gatewayPing = event.getJDA().getGatewayPing();
 

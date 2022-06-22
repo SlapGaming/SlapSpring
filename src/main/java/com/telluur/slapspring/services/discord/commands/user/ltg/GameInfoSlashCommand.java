@@ -4,10 +4,11 @@ import com.telluur.slapspring.model.ltg.LTGGame;
 import com.telluur.slapspring.model.ltg.LTGGameRepository;
 import com.telluur.slapspring.services.discord.BotSession;
 import com.telluur.slapspring.services.discord.commands.ICommand;
-import com.telluur.slapspring.services.discord.commands.user.ltg.listgames.ListGamesSlashCommand;
+import com.telluur.slapspring.services.discord.impl.ltg.LTGQuickSubscribeService;
 import com.telluur.slapspring.services.discord.impl.ltg.LTGUtil;
 import com.telluur.slapspring.services.discord.util.paginator.IPaginator;
-import com.telluur.slapspring.services.discord.util.paginator.PaginatorService;
+import com.telluur.slapspring.services.discord.util.paginator.PaginatorException;
+import com.telluur.slapspring.services.discord.util.paginator.PaginatorPage;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
@@ -19,11 +20,11 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Nonnull;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -47,28 +48,29 @@ public class GameInfoSlashCommand implements ICommand, IPaginator {
     @Autowired
     LTGGameRepository repository;
 
+    @Autowired
+    LTGQuickSubscribeService quickSubscribeService;
+
+    @Nonnull
     @Override
     public CommandData data() {
         return COMMAND_DATA;
     }
 
     @Override
-    public void handle(SlashCommandInteractionEvent event) {
+    public void handle(@Nonnull SlashCommandInteractionEvent event) {
         Role role = Objects.requireNonNull(event.getOption(OPTION_ROLE_NAME, OptionMapping::getAsRole)); //Assumes working front end validation
 
         if (repository.existsById(role.getIdLong())) {
             event.deferReply().queue();
+            try {
+                Message msg = paginate(role.getId(), 0).toDiscordMessage();
+                event.getHook().sendMessage(msg).queue();
+            } catch (PaginatorException e) {
+                MessageEmbed me = LTGUtil.failureEmbed(e.getMessage());
+                event.replyEmbeds(me).queue();
+            }
 
-            String roleIdString = role.getId(); //Persistent data passed on button
-            int startingIndex = 0;
-            Message paginatorMessage = PaginatorService.createPaginatorMessage(
-                    paginate(roleIdString, 0),
-                    GAME_INFO_PAGINATOR_ID,
-                    roleIdString,
-                    startingIndex,
-                    getNumberOfTotalPages(role)
-            );
-            event.getHook().sendMessage(paginatorMessage).queue();
         } else {
             MessageEmbed me = LTGUtil.failureEmbed(String.format("%s is not a Looking-To-Game role.", role.getAsMention()));
             event.replyEmbeds(me).setEphemeral(true).queue();
@@ -76,7 +78,7 @@ public class GameInfoSlashCommand implements ICommand, IPaginator {
     }
 
     @Override
-    public @NotNull String getPaginatorId() {
+    public @Nonnull String getPaginatorId() {
         return GAME_INFO_PAGINATOR_ID;
     }
 
@@ -105,7 +107,7 @@ public class GameInfoSlashCommand implements ICommand, IPaginator {
     }
 
     @Override
-    public @NotNull MessageEmbed paginate(String data, int index) {
+    public @Nonnull PaginatorPage paginate(String data, int index) throws PaginatorException {
         Role role = parseData(data);
 
         if (role != null) {
@@ -114,27 +116,37 @@ public class GameInfoSlashCommand implements ICommand, IPaginator {
                 String pageString = getSubscribers(role).stream()
                         .sorted(Comparator.comparing(Member::getEffectiveName))
                         .skip((long) index * PAGE_SIZE) //Skip items to get to the indexed page
-                        .limit((long) PAGE_SIZE) //Max 10 items
+                        .limit(PAGE_SIZE) //Max 10 items
                         .map(member -> String.format("- %s", member.getAsMention()))
                         .collect(Collectors.joining("\r\n"));
 
-                return new EmbedBuilder()
+                MessageEmbed me = new EmbedBuilder()
                         .setColor(LTGUtil.LTG_SUCCESS_COLOR)
                         .setTitle("Looking-To-Game Role Info")
                         .setDescription(String.format("""
                                         **Role:** %s
                                         **Total subscribers:** `%d`
-                                        
-                                        **Subscribers:**                                
+                                                                                
+                                        **Subscribers:**
                                         %s""",
                                 role.getAsMention(),
                                 getSubscribers(role).size(),
                                 pageString))
                         .setFooter(String.format("Use /%s to see all Looking-To-Game roles.", ListGamesSlashCommand.COMMAND_NAME))
                         .build();
+
+                PaginatorPage.Builder pageBuilder = PaginatorPage.builder()
+                        .paginatorId(GAME_INFO_PAGINATOR_ID)
+                        .index(index)
+                        .totalPages(getNumberOfTotalPages(role))
+                        .data(data)
+                        .messageEmbed(me);
+                quickSubscribeService.createQSActionRowWithLTGGames(List.of(OptionalLTGGame.get()))
+                        .ifPresent(pageBuilder::additionalActionRow); //Add Quicksubscribe if possible.
+                return pageBuilder.build();
             }
         }
-        return LTGUtil.failureEmbed("Could not find the Looking-To-Game role. Has it been deleted?");
+        throw new PaginatorException("Could not find the Looking-To-Game role. Has it been deleted?");
     }
 
     @Nullable
