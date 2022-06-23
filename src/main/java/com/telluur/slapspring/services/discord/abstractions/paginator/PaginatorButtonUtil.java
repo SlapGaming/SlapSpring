@@ -1,4 +1,4 @@
-package com.telluur.slapspring.services.discord.util.paginator;
+package com.telluur.slapspring.services.discord.abstractions.paginator;
 
 import javax.annotation.Nonnull;
 import java.util.regex.Pattern;

@@ -1,7 +1,7 @@
-package com.telluur.slapspring.services.discord.commands.user;
+package com.telluur.slapspring.services.discord.impl.misc.commands;
 
 import com.telluur.slapspring.SlapSpringApplication;
-import com.telluur.slapspring.services.discord.commands.ICommand;
+import com.telluur.slapspring.services.discord.abstractions.commands.ICommand;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
@@ -15,7 +15,7 @@ public class VersionSlashCommand implements ICommand {
     public static final String COMMAND_NAME = "version";
     public static final String COMMAND_DESCRIPTION = "Displays the bot's version.";
     public static final String VERSION = Optional.ofNullable(SlapSpringApplication.class.getPackage().getImplementationVersion()).orElse("DEV");
-    private static final CommandData commandData = Commands.slash(COMMAND_NAME, COMMAND_DESCRIPTION).setDefaultEnabled(true );
+    private static final CommandData commandData = Commands.slash(COMMAND_NAME, COMMAND_DESCRIPTION).setDefaultEnabled(true);
 
     @Nonnull
     @Override

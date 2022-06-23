@@ -1,4 +1,4 @@
-package com.telluur.slapspring.services.discord.commands.system;
+package com.telluur.slapspring.services.discord.impl.restricted.commands;
 
 import com.telluur.slapspring.services.discord.BotSession;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -14,7 +14,7 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
 @Service
-public class EvalCommand extends AbstractSystemCommand {
+public class EvalCommand extends AbstractRestrictedCommand {
     public static final String COMMAND_NAME = "eval";
     public static final String COMMAND_DESCRIPTION = "Evaluates nashorn code, available bindings: jda, bot, event, guild, channel.";
     public static final String OPTION_NASHORN_NAME = "nashorn";

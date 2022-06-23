@@ -1,4 +1,4 @@
-package com.telluur.slapspring.services.discord.commands.system;
+package com.telluur.slapspring.services.discord.impl.restricted.commands;
 
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Nonnull;
 
 @Service
-public class KillCommand extends AbstractSystemCommand {
+public class KillCommand extends AbstractRestrictedCommand {
     public static final String COMMAND_NAME = "kill";
     public static final String COMMAND_DESCRIPTION = "Attempts a shutdown of the Spring container.";
     private static final CommandData commandData = Commands.slash(COMMAND_NAME, COMMAND_DESCRIPTION).setDefaultEnabled(false);

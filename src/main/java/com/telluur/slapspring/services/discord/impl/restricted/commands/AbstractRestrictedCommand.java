@@ -1,13 +1,13 @@
-package com.telluur.slapspring.services.discord.commands.system;
+package com.telluur.slapspring.services.discord.impl.restricted.commands;
 
 import com.telluur.slapspring.services.discord.BotProperties;
-import com.telluur.slapspring.services.discord.commands.ICommand;
+import com.telluur.slapspring.services.discord.abstractions.commands.ICommand;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
 
-abstract class AbstractSystemCommand implements ICommand {
+abstract class AbstractRestrictedCommand implements ICommand {
     @Autowired
     BotProperties botProperties;
 

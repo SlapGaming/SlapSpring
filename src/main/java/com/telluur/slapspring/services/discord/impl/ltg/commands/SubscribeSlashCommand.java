@@ -1,6 +1,6 @@
-package com.telluur.slapspring.services.discord.commands.user.ltg;
+package com.telluur.slapspring.services.discord.impl.ltg.commands;
 
-import com.telluur.slapspring.services.discord.commands.ICommand;
+import com.telluur.slapspring.services.discord.abstractions.commands.ICommand;
 import com.telluur.slapspring.services.discord.impl.ltg.LTGQuickSubscribeService;
 import com.telluur.slapspring.services.discord.impl.ltg.LTGRoleService;
 import com.telluur.slapspring.services.discord.impl.ltg.LTGUtil;

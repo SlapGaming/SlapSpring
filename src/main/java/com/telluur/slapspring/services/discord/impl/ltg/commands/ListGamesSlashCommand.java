@@ -1,14 +1,14 @@
-package com.telluur.slapspring.services.discord.commands.user.ltg;
+package com.telluur.slapspring.services.discord.impl.ltg.commands;
 
 import com.telluur.slapspring.model.ltg.LTGGame;
 import com.telluur.slapspring.model.ltg.LTGGameRepository;
 import com.telluur.slapspring.services.discord.BotSession;
-import com.telluur.slapspring.services.discord.commands.ICommand;
+import com.telluur.slapspring.services.discord.abstractions.commands.ICommand;
+import com.telluur.slapspring.services.discord.abstractions.paginator.IPaginator;
+import com.telluur.slapspring.services.discord.abstractions.paginator.PaginatorException;
+import com.telluur.slapspring.services.discord.abstractions.paginator.PaginatorPage;
 import com.telluur.slapspring.services.discord.impl.ltg.LTGQuickSubscribeService;
 import com.telluur.slapspring.services.discord.impl.ltg.LTGUtil;
-import com.telluur.slapspring.services.discord.util.paginator.IPaginator;
-import com.telluur.slapspring.services.discord.util.paginator.PaginatorException;
-import com.telluur.slapspring.services.discord.util.paginator.PaginatorPage;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.Guild;

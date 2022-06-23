@@ -1,9 +1,9 @@
-package com.telluur.slapspring.services.discord.commands.user.ltg;
+package com.telluur.slapspring.services.discord.impl.ltg.commands;
 
 import com.telluur.slapspring.model.ltg.LTGGame;
 import com.telluur.slapspring.model.ltg.LTGGameRepository;
 import com.telluur.slapspring.services.discord.BotSession;
-import com.telluur.slapspring.services.discord.commands.ICommand;
+import com.telluur.slapspring.services.discord.abstractions.commands.ICommand;
 import com.telluur.slapspring.services.discord.impl.ltg.LTGUtil;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageEmbed;

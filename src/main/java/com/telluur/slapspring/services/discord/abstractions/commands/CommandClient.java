@@ -1,4 +1,4 @@
-package com.telluur.slapspring.services.discord.commands;
+package com.telluur.slapspring.services.discord.abstractions.commands;
 
 import com.telluur.slapspring.services.discord.BotSession;
 import lombok.extern.slf4j.Slf4j;

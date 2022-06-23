@@ -1,6 +1,6 @@
-package com.telluur.slapspring.services.discord.commands.user;
+package com.telluur.slapspring.services.discord.impl.misc.commands;
 
-import com.telluur.slapspring.services.discord.commands.ICommand;
+import com.telluur.slapspring.services.discord.abstractions.commands.ICommand;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;

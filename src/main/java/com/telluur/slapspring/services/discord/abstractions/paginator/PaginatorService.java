@@ -1,4 +1,4 @@
-package com.telluur.slapspring.services.discord.util.paginator;
+package com.telluur.slapspring.services.discord.abstractions.paginator;
 
 
 import com.telluur.slapspring.services.discord.util.DiscordUtil;
@@ -17,8 +17,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
-
-import static com.telluur.slapspring.services.discord.util.paginator.PaginatorButtonUtil.*;
 
 /**
  * Single listener implementation for a generic paginator service.
@@ -54,7 +52,7 @@ public class PaginatorService extends ListenerAdapter {
     public void onButtonInteraction(@Nonnull ButtonInteractionEvent event) {
         String buttonId = event.getButton().getId();
         if (buttonId != null) {
-            final Matcher matcher = FULL_BUTTON_REGEX.matcher(buttonId);
+            final Matcher matcher = PaginatorButtonUtil.FULL_BUTTON_REGEX.matcher(buttonId);
             boolean isValidButtonId = matcher.matches();
             if (isValidButtonId) { //Paginator button, have to handle response
                 event.deferEdit().queue();
@@ -72,8 +70,8 @@ public class PaginatorService extends ListenerAdapter {
                     int totalPages = paginator.getNumberOfTotalPages(data);
 
                     int requestedIndex = switch (indexString) {
-                        case PAGINATOR_FIRST_PAGE_INDEX -> 0;
-                        case PAGINATOR_LAST_PAGE_INDEX -> totalPages - 1;
+                        case PaginatorButtonUtil.PAGINATOR_FIRST_PAGE_INDEX -> 0;
+                        case PaginatorButtonUtil.PAGINATOR_LAST_PAGE_INDEX -> totalPages - 1;
                         default -> Integer.parseInt(indexString); //Should never throw since it passed the regex match.
                     };
 

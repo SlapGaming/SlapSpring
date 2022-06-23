@@ -1,6 +1,6 @@
-package com.telluur.slapspring.services.discord.commands.user;
+package com.telluur.slapspring.services.discord.impl.avatar.commands;
 
-import com.telluur.slapspring.services.discord.commands.ICommand;
+import com.telluur.slapspring.services.discord.abstractions.commands.ICommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
