@@ -1,7 +1,7 @@
 package com.telluur.slapspring.services.discord.impl.ltg.commands;
 
-import com.telluur.slapspring.model.ltg.LTGGame;
-import com.telluur.slapspring.model.ltg.LTGGameRepository;
+import com.telluur.slapspring.services.discord.impl.ltg.model.LTGGame;
+import com.telluur.slapspring.services.discord.impl.ltg.model.LTGGameRepository;
 import com.telluur.slapspring.services.discord.BotSession;
 import com.telluur.slapspring.services.discord.abstractions.commands.ICommand;
 import com.telluur.slapspring.services.discord.impl.ltg.LTGUtil;

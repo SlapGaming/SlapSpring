@@ -41,7 +41,6 @@ public interface IPaginator {
      * @param index 0 indexed number
      * @return Page content
      */
-    //TODO Allow this method to throw, so the PaginatorService can remove the buttons
     @Nonnull
     PaginatorPage paginate(String data, int index) throws PaginatorException;
 }

@@ -35,6 +35,7 @@ public class EvalCommand extends AbstractRestrictedCommand {
 
     @Override
     public void systemHandle(SlashCommandInteractionEvent event) {
+        //TODO IMPLEMENT GRAALVM, This is broken
         event.deferReply().queue();
 
         String nashornCode = event.getOption(OPTION_NASHORN_NAME, OptionMapping::getAsString);

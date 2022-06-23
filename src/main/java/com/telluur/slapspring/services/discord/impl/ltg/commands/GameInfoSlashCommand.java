@@ -1,7 +1,5 @@
 package com.telluur.slapspring.services.discord.impl.ltg.commands;
 
-import com.telluur.slapspring.model.ltg.LTGGame;
-import com.telluur.slapspring.model.ltg.LTGGameRepository;
 import com.telluur.slapspring.services.discord.BotSession;
 import com.telluur.slapspring.services.discord.abstractions.commands.ICommand;
 import com.telluur.slapspring.services.discord.abstractions.paginator.IPaginator;
@@ -9,6 +7,8 @@ import com.telluur.slapspring.services.discord.abstractions.paginator.PaginatorE
 import com.telluur.slapspring.services.discord.abstractions.paginator.PaginatorPage;
 import com.telluur.slapspring.services.discord.impl.ltg.LTGQuickSubscribeService;
 import com.telluur.slapspring.services.discord.impl.ltg.LTGUtil;
+import com.telluur.slapspring.services.discord.impl.ltg.model.LTGGame;
+import com.telluur.slapspring.services.discord.impl.ltg.model.LTGGameRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
@@ -62,7 +62,8 @@ public class GameInfoSlashCommand implements ICommand, IPaginator {
         Role role = Objects.requireNonNull(event.getOption(OPTION_ROLE_NAME, OptionMapping::getAsRole)); //Assumes working front end validation
 
         if (repository.existsById(role.getIdLong())) {
-            event.deferReply().queue();
+            boolean inLtgTx = event.getChannel().equals(session.getLTGTX());
+            event.deferReply(!inLtgTx).queue();
             try {
                 Message msg = paginate(role.getId(), 0).toDiscordMessage();
                 event.getHook().sendMessage(msg).queue();
@@ -111,14 +112,19 @@ public class GameInfoSlashCommand implements ICommand, IPaginator {
         Role role = parseData(data);
 
         if (role != null) {
-            Optional<LTGGame> OptionalLTGGame = repository.findById(role.getIdLong());
-            if (OptionalLTGGame.isPresent()) {
+            Optional<LTGGame> optionalLTGGame = repository.findById(role.getIdLong());
+            if (optionalLTGGame.isPresent()) {
                 String pageString = getSubscribers(role).stream()
                         .sorted(Comparator.comparing(Member::getEffectiveName))
                         .skip((long) index * PAGE_SIZE) //Skip items to get to the indexed page
                         .limit(PAGE_SIZE) //Max 10 items
-                        .map(member -> String.format("- %s", member.getAsMention()))
+                        .map(member -> String.format("- %s (%s#%s)",
+                                member.getAsMention(),
+                                member.getUser().getName(),
+                                member.getUser().getDiscriminator()))
                         .collect(Collectors.joining("\r\n"));
+
+                LTGGame ltgGame = optionalLTGGame.get();
 
                 MessageEmbed me = new EmbedBuilder()
                         .setColor(LTGUtil.LTG_SUCCESS_COLOR)
@@ -132,7 +138,11 @@ public class GameInfoSlashCommand implements ICommand, IPaginator {
                                 role.getAsMention(),
                                 getSubscribers(role).size(),
                                 pageString))
-                        .setFooter(String.format("Use /%s to see all Looking-To-Game roles.", ListGamesSlashCommand.COMMAND_NAME))
+                        .setFooter(
+                                String.format(
+                                        "Use /%s to see all Looking-To-Game roles or use the button below to subscribe to %s.",
+                                        ListGamesSlashCommand.COMMAND_NAME, ltgGame.getAbbreviation())
+                        )
                         .build();
 
                 PaginatorPage.Builder pageBuilder = PaginatorPage.builder()
@@ -141,7 +151,7 @@ public class GameInfoSlashCommand implements ICommand, IPaginator {
                         .totalPages(getNumberOfTotalPages(role))
                         .data(data)
                         .messageEmbed(me);
-                quickSubscribeService.createQSActionRowWithLTGGames(List.of(OptionalLTGGame.get()))
+                quickSubscribeService.createQSActionRowWithLTGGames(List.of(ltgGame))
                         .ifPresent(pageBuilder::additionalActionRow); //Add Quicksubscribe if possible.
                 return pageBuilder.build();
             }

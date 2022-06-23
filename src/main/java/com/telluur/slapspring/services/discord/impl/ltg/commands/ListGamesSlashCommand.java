@@ -1,7 +1,5 @@
 package com.telluur.slapspring.services.discord.impl.ltg.commands;
 
-import com.telluur.slapspring.model.ltg.LTGGame;
-import com.telluur.slapspring.model.ltg.LTGGameRepository;
 import com.telluur.slapspring.services.discord.BotSession;
 import com.telluur.slapspring.services.discord.abstractions.commands.ICommand;
 import com.telluur.slapspring.services.discord.abstractions.paginator.IPaginator;
@@ -9,6 +7,8 @@ import com.telluur.slapspring.services.discord.abstractions.paginator.PaginatorE
 import com.telluur.slapspring.services.discord.abstractions.paginator.PaginatorPage;
 import com.telluur.slapspring.services.discord.impl.ltg.LTGQuickSubscribeService;
 import com.telluur.slapspring.services.discord.impl.ltg.LTGUtil;
+import com.telluur.slapspring.services.discord.impl.ltg.model.LTGGame;
+import com.telluur.slapspring.services.discord.impl.ltg.model.LTGGameRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.Guild;
@@ -87,7 +87,8 @@ public class ListGamesSlashCommand extends ListenerAdapter implements ICommand, 
 
     @Override
     public void handle(@Nonnull SlashCommandInteractionEvent event) {
-        event.deferReply().queue();
+        boolean inLtgTx = event.getChannel().equals(session.getLTGTX());
+        event.deferReply(!inLtgTx).queue();
         int startIndex = 0;
         Message msg;
         try {
@@ -138,7 +139,11 @@ public class ListGamesSlashCommand extends ListenerAdapter implements ICommand, 
                                     %s""",
                             getNumberOfTotalGames(),
                             gamesListString))
-                    .setFooter(String.format("Use /%s to see individual subscribers.", GameInfoSlashCommand.COMMAND_NAME))
+                    .setFooter(
+                            String.format(
+                                    "Use /%s to see individual subscribers or use the button(s)/dropdown below to subscribe to a Looking-To-Game role.",
+                                    GameInfoSlashCommand.COMMAND_NAME)
+                    )
                     .build();
 
             PaginatorPage.Builder pageBuilder = PaginatorPage.builder()

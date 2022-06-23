@@ -25,4 +25,4 @@ jda:
   role-community: ${DISCORD_ROLE_COMMUNITY}
   tx-general: ${DISCORD_TX_GENERAL}
   tx-ltg: ${DISCORD_TX_LTG}
-  tx-nda: ${DISCORD_TX_NSA}
+  tx-nsa: ${DISCORD_TX_NSA}

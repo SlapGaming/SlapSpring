@@ -1,6 +1,6 @@
-package com.telluur.slapspring.services.discord.impl.ltg;
+package com.telluur.slapspring.services.discord.impl.ltg.listeners;
 
-import com.telluur.slapspring.model.ltg.LTGGameRepository;
+import com.telluur.slapspring.services.discord.impl.ltg.model.LTGGameRepository;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.role.RoleDeleteEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;

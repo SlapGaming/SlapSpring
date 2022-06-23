@@ -1,6 +1,6 @@
 package com.telluur.slapspring.services.discord.impl.ltg;
 
-import com.telluur.slapspring.model.ltg.LTGGameRepository;
+import com.telluur.slapspring.services.discord.impl.ltg.model.LTGGameRepository;
 import com.telluur.slapspring.services.discord.BotSession;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;

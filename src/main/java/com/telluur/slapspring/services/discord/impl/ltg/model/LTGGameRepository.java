@@ -1,4 +1,4 @@
-package com.telluur.slapspring.model.ltg;
+package com.telluur.slapspring.services.discord.impl.ltg.model;
 
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;

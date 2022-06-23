@@ -1,7 +1,7 @@
 package com.telluur.slapspring.services.discord.impl.ltg;
 
-import com.telluur.slapspring.model.ltg.LTGGame;
-import com.telluur.slapspring.model.ltg.LTGGameRepository;
+import com.telluur.slapspring.services.discord.impl.ltg.model.LTGGame;
+import com.telluur.slapspring.services.discord.impl.ltg.model.LTGGameRepository;
 import com.telluur.slapspring.services.discord.BotSession;
 import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.Guild;
@@ -13,6 +13,7 @@ import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEve
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.Component;
+import net.dv8tion.jda.api.interactions.components.ItemComponent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.selections.SelectMenu;
 import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
@@ -65,15 +66,16 @@ public class LTGQuickSubscribeService extends ListenerAdapter {
      * @param roles the Roles the user will be able to join
      */
     private void sendQuickSubscribeWithMessageBuilder(Collection<Role> roles, @Nonnull MessageBuilder msgBuilder) {
-
         Optional<ActionRow> opt = createQSActionRowWithRoles(roles);
         if (opt.isPresent()) {
             ActionRow ltgQuickSubActionRow = opt.get();
-            if (ltgQuickSubActionRow.getType().equals(Component.Type.SELECT_MENU)) {
+            List<ItemComponent> components = ltgQuickSubActionRow.getComponents();
+            if (components.size() == 1 && components.get(0).getType().equals(Component.Type.SELECT_MENU)) {
                 msgBuilder.append("Select the Looking-To-Game roles you wish to join from the dropdown.")
                         .setActionRows(ltgQuickSubActionRow, ActionRow.of(INFO_BUTTON))
                         .build();
             } else {
+                components.add(INFO_BUTTON);
                 msgBuilder.append("Use the buttons below to join Looking-To-Game roles.")
                         .setActionRows(ltgQuickSubActionRow)
                         .build();
@@ -96,12 +98,11 @@ public class LTGQuickSubscribeService extends ListenerAdapter {
         if (ltgGames == null || ltgGames.size() <= 0 || ltgGames.size() > 25) {
             return Optional.empty();
         } else if (ltgGames.size() == 1 || ltgGames.size() == 2) {
-            //We create 2 LTG buttons and the info button.
+            //We create max 2 LTG buttons.
             List<Button> buttons = ltgGames.stream().map(ltgGame -> Button.primary(
                     String.format("%s%d", QUICK_SUBSCRIBE_PREFIX, ltgGame.getId()),
                     String.format(SUBSCRIBE_ACTION_TEXT, ltgGame.getAbbreviation()))
             ).collect(Collectors.toList());
-            buttons.add(INFO_BUTTON);
             return Optional.of(ActionRow.of(buttons));
         } else { //More than 2, but 25 or less roles.
             //We create a dropdown list instead.
