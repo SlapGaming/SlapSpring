@@ -1,7 +1,7 @@
 package com.telluur.slapspring;
 
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
-import com.telluur.slapspring.services.discord.BotProperties;
+import com.telluur.slapspring.core.discord.BotProperties;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
