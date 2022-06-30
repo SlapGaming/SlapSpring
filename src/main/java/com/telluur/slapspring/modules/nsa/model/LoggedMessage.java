@@ -19,17 +19,18 @@ public class LoggedMessage {
     @Id
     private long id;
 
-    @Column(nullable = false)
-    private String contentRaw;
+    private int version = 0;
 
     @Column(nullable = false)
     private long channelId, userId;
 
-
     private String jumpUrl;
 
+    @Column(nullable = false)
+    private String contentRaw;
 
-    @OneToMany(mappedBy="uuid")
+
+    @OneToMany(mappedBy="id")
     private List<LoggedAttachment> attachmentList;
 
 }

@@ -36,7 +36,7 @@ dependencies {
     implementation 'org.mariadb.jdbc:mariadb-java-client:3.0.4'
 
 
-    implementation 'net.dv8tion:JDA:5.0.0-alpha.11'
+    implementation 'net.dv8tion:JDA:5.0.0-alpha.12'
     implementation 'pw.chew:jda-chewtils:2.0-SNAPSHOT'
 
     implementation 'com.vdurmont:emoji-java:5.1.1'

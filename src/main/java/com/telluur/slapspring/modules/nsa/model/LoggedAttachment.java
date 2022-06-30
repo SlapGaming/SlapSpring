@@ -3,7 +3,6 @@ package com.telluur.slapspring.modules.nsa.model;
 import lombok.*;
 
 import javax.persistence.*;
-import java.util.UUID;
 
 //JPA
 @Entity
@@ -17,14 +16,14 @@ import java.util.UUID;
 @Setter
 public class LoggedAttachment {
 
-    @GeneratedValue
     @Id
-    private UUID uuid = UUID.randomUUID();
+    private long id;
 
-    private String name;
+
+    private String name, extension, contentType;
 
     @Lob
     private byte[] content;
 
-
+    private boolean deleted = false;
 }

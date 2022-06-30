@@ -1,22 +1,26 @@
 package com.telluur.slapspring.modules.nsa;
 
 import com.telluur.slapspring.core.discord.BotSession;
+import com.telluur.slapspring.modules.nsa.model.LoggedAttachment;
+import com.telluur.slapspring.modules.nsa.model.LoggedMessage;
+import com.telluur.slapspring.modules.nsa.model.LoggedMessageRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.events.message.MessageBulkDeleteEvent;
-import net.dv8tion.jda.api.events.message.MessageDeleteEvent;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.api.events.message.MessageUpdateEvent;
+import net.dv8tion.jda.api.events.message.*;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.awt.*;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 
 @Service
@@ -28,22 +32,61 @@ public class ChatListener extends ListenerAdapter {
 
     private final Map<String, Message> db = new HashMap<>();
 
+    @Autowired
+    LoggedMessageRepository messageRepository;
 
     @Autowired
     private BotSession session;
 
     @Override
     public void onMessageReceived(@NotNull MessageReceivedEvent event) {
-        //Skip bot messages
-        if (event.getAuthor().isBot()) {
+        //Skip bot messages, and non-focussed channels
+        if (event.getAuthor().isBot() || !inFocusChannel(event)) {
             return;
         }
-        db.put(event.getMessageId(), event.getMessage());
+
+        Message message = event.getMessage();
+        List<CompletableFuture<LoggedAttachment>> attachmentFutures = message.getAttachments().stream()
+                .map(attachment -> {
+                            CompletableFuture<InputStream> download = attachment.getProxy().download();
+                            return download.thenApply(inputStream -> {
+                                try (inputStream) {
+                                    LoggedAttachment la = new LoggedAttachment();
+
+                                    byte[] content = inputStream.readAllBytes();
+                                    la.setContent(content);
+
+                                    la.setId(attachment.getIdLong());
+                                    la.setName(attachment.getFileName());
+                                    la.setContentType(attachment.getContentType());
+
+                                    return la;
+                                } catch (IOException e) {
+                                    return null;
+                                }
+                            });
+                        }
+                ).toList();
+        CompletableFuture<Void> allFutures = CompletableFuture.allOf(
+                attachmentFutures.toArray(new CompletableFuture[0])
+        );
+        allFutures.thenAccept(v -> {
+            List<LoggedAttachment> loggedAttachments = attachmentFutures.stream().map(CompletableFuture::join).toList();
+            LoggedMessage loggedMessage = new LoggedMessage();
+            loggedMessage.setId(message.getIdLong());
+            loggedMessage.setChannelId(message.getChannel().getIdLong());
+            loggedMessage.setUserId(message.getAuthor().getIdLong());
+            loggedMessage.setJumpUrl(message.getJumpUrl());
+            loggedMessage.setContentRaw(message.getContentRaw());
+            loggedMessage.setAttachmentList(loggedAttachments);
+            messageRepository.save(loggedMessage);
+        });
+
     }
 
     @Override
     public void onMessageUpdate(@NotNull MessageUpdateEvent event) {
-        if (event.isFromGuild() && db.containsKey(event.getMessageId())) {
+        if (inFocusChannel(event) && messageRepository.existsById(event.getMessageIdLong())) {
             Message oldMsg = db.get(event.getMessageId());
             Message updatedMsg = event.getMessage();
 
@@ -67,7 +110,7 @@ public class ChatListener extends ListenerAdapter {
                             **\u2015\u2015 \u25B2OLD\u25B2 \u2015 \u25BCNEW\u25BC \u2015\u2015**
                                                         
                             %s
-                            
+                                                        
                              **\u2015\u2015\u2015\u2015\u2015 \u25B2NEW\u25B2 \u2015\u2015\u2015\u2015\u2015**
                             """,
                     channelTypeString,
@@ -108,5 +151,17 @@ public class ChatListener extends ListenerAdapter {
     @Override
     public void onMessageBulkDelete(@NotNull MessageBulkDeleteEvent event) {
         super.onMessageBulkDelete(event);
+    }
+
+    /**
+     * We only want to log messages from the bound guild, and exclude the NSA channel to avoid echo
+     *
+     * @param event the event to perform the check on
+     * @return true when it is a target channel for logging
+     */
+    private boolean inFocusChannel(@NotNull GenericMessageEvent event) {
+        return event.isFromGuild()
+                && event.getGuild().equals(session.getBoundGuild())
+                && !event.getChannel().equals(session.getNSATX());
     }
 }
