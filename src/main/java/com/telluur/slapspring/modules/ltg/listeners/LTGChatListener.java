@@ -28,7 +28,7 @@ public class LTGChatListener extends ListenerAdapter {
     public void onMessageReceived(@Nonnull MessageReceivedEvent event) {
         Message message = event.getMessage();
         if (message.isFromGuild() && !message.getAuthor().isBot() && message.getTextChannel().getId().equals(ltgTxId)) {
-            Set<Role> roles = message.getMentionedRolesBag().uniqueSet();
+            Set<Role> roles = message.getMentions().getRolesBag().uniqueSet();
             quickSubscribeService.sendQuickSubscribe(roles);
         }
     }

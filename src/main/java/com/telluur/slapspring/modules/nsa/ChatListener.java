@@ -13,13 +13,12 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.awt.*;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 
@@ -45,6 +44,8 @@ public class ChatListener extends ListenerAdapter {
             return;
         }
 
+        System.out.println("Saving message");
+
         Message message = event.getMessage();
         List<CompletableFuture<LoggedAttachment>> attachmentFutures = message.getAttachments().stream()
                 .map(attachment -> {
@@ -56,7 +57,6 @@ public class ChatListener extends ListenerAdapter {
                                     byte[] content = inputStream.readAllBytes();
                                     la.setContent(content);
 
-                                    la.setId(attachment.getIdLong());
                                     la.setName(attachment.getFileName());
                                     la.setContentType(attachment.getContentType());
 
@@ -77,17 +77,23 @@ public class ChatListener extends ListenerAdapter {
             loggedMessage.setChannelId(message.getChannel().getIdLong());
             loggedMessage.setUserId(message.getAuthor().getIdLong());
             loggedMessage.setJumpUrl(message.getJumpUrl());
-            loggedMessage.setContentRaw(message.getContentRaw());
+            loggedMessage.appendContentHistory(message.getContentRaw());
             loggedMessage.setAttachmentList(loggedAttachments);
-            messageRepository.save(loggedMessage);
+            LoggedMessage save = messageRepository.save(loggedMessage);
         });
 
     }
 
+    @Transactional
     @Override
     public void onMessageUpdate(@NotNull MessageUpdateEvent event) {
-        if (inFocusChannel(event) && messageRepository.existsById(event.getMessageIdLong())) {
-            Message oldMsg = db.get(event.getMessageId());
+        long msgId = event.getMessageIdLong();
+        Optional<LoggedMessage> optionalLoggedMessage = messageRepository.findById(msgId);
+
+        if (inFocusChannel(event) && optionalLoggedMessage.isPresent()) {
+            System.out.println("Updating a logged message");
+
+            LoggedMessage loggedMessage = optionalLoggedMessage.get();
             Message updatedMsg = event.getMessage();
 
             String channelTypeString = switch (event.getChannelType()) {
@@ -118,8 +124,9 @@ public class ChatListener extends ListenerAdapter {
                     Objects.requireNonNull(event.getMember()).getAsMention(), //Checked by event.isFromGuild()
                     event.getAuthor().getName(),
                     event.getAuthor().getDiscriminator(),
-                    oldMsg.getContentDisplay(),
-                    updatedMsg.getContentDisplay()
+
+                    loggedMessage.getContentHistory().getLast().getContentRaw(),
+                    updatedMsg.getContentRaw()
             );
 
 
@@ -139,7 +146,9 @@ public class ChatListener extends ListenerAdapter {
 
             session.getNSATX().sendMessageEmbeds(me).queue();
 
-            db.replace(event.getMessageId(), updatedMsg);
+
+            loggedMessage.appendContentHistory(updatedMsg.getContentRaw());
+            messageRepository.save(loggedMessage);
         }
     }
 

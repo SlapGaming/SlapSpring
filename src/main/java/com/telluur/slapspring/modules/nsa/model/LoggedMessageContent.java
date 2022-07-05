@@ -1,9 +1,21 @@
 package com.telluur.slapspring.modules.nsa.model;
 
-import javax.persistence.Id;
+import lombok.*;
 
+import javax.persistence.*;
+
+//JPA
+@Embeddable
+
+
+//Lombok
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
 public class LoggedMessageContent {
 
-    @Id
-    //TODO
+    @Column(nullable = false)
+    private String contentRaw;
 }

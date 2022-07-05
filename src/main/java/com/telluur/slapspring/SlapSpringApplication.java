@@ -2,11 +2,14 @@ package com.telluur.slapspring;
 
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
 import com.telluur.slapspring.core.discord.BotProperties;
+import com.telluur.slapspring.modules.nsa.model.LoggedMessage;
+import com.telluur.slapspring.modules.nsa.model.LoggedMessageRepository;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
@@ -37,6 +40,23 @@ public class SlapSpringApplication {
     @Bean
     public EventWaiter eventWaiter() {
         return new EventWaiter();
+    }
+
+
+    @Bean
+    public CommandLineRunner testnsa(@Autowired LoggedMessageRepository repo){
+        return (args) -> {
+            LoggedMessage loggedMessage = new LoggedMessage();
+            loggedMessage.setId(1);
+            loggedMessage.setChannelId(2);
+            loggedMessage.setUserId(3);
+            loggedMessage.setJumpUrl("url");
+            loggedMessage.appendContentHistory("first msg");
+            LoggedMessage save = repo.save(loggedMessage);
+            System.out.println("Called save()");
+            System.out.println(save != null ? save.toString() : "null");
+        };
+
     }
 
 }

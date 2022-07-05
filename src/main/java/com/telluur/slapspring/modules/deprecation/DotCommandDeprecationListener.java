@@ -2,9 +2,7 @@ package com.telluur.slapspring.modules.deprecation;
 
 import com.telluur.slapspring.modules.avatar.commands.AvatarSlashCommand;
 import com.telluur.slapspring.modules.ltg.commands.*;
-import com.telluur.slapspring.modules.misc.commands.*;
 import com.telluur.slapspring.modules.misc.discord.commands.*;
-import com.telluur.slapspring.services.discord.impl.misc.commands.*;
 import com.telluur.slapspring.modules.commands.EvalCommand;
 import com.telluur.slapspring.modules.commands.KillCommand;
 import net.dv8tion.jda.api.EmbedBuilder;

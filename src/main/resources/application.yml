@@ -9,7 +9,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
-    database-platform: com.telluur.slapspring.util.CustomMariaDB103Dialect
+    database-platform: com.telluur.slapspring.util.jpa.CustomMariaDB103Dialect
     show-sql: false
 
 jda:

@@ -3,6 +3,8 @@ package com.telluur.slapspring.modules.nsa.model;
 import lombok.*;
 
 import javax.persistence.*;
+import javax.transaction.Transactional;
+import java.util.LinkedList;
 import java.util.List;
 
 //JPA
@@ -19,18 +21,31 @@ public class LoggedMessage {
     @Id
     private long id;
 
-    private int version = 0;
-
     @Column(nullable = false)
     private long channelId, userId;
 
+    @Builder.Default
+    private boolean deleted = false;
+
     private String jumpUrl;
+    //@ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "nsa_logged_messagecontent")
+    @OrderColumn
+    @Builder.Default
+    private List<LoggedMessageContent> contentHistory = new LinkedList<>();
 
-    @Column(nullable = false)
-    private String contentRaw;
 
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "nsa_logged_attachments")
+    @Builder.Default
+    private List<LoggedAttachment> attachmentList = new LinkedList<>();
 
-    @OneToMany(mappedBy="id")
-    private List<LoggedAttachment> attachmentList;
+    @Transactional
+    public void appendContentHistory(String contentRaw) {
+        LoggedMessageContent lmc = new LoggedMessageContent();
+        lmc.setContentRaw(contentRaw);
+        contentHistory.add(lmc);
+    }
 
 }
