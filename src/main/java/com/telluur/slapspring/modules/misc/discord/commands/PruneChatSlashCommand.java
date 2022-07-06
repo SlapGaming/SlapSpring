@@ -9,6 +9,8 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+import net.dv8tion.jda.api.requests.RestAction;
+import net.dv8tion.jda.api.requests.restaction.AuditableRestAction;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
@@ -16,12 +18,14 @@ import java.util.List;
 
 @Service
 public class PruneChatSlashCommand implements ICommand {
+    private static final int UPPER_LIMIT = 100;
+
     public static final String COMMAND_NAME = "prune";
     public static final String COMMAND_DESCRIPTION = "Deletes the last <limit> messages in a textchannel, skips pinned messages.";
     public static final String OPTION_LIMIT_NAME = "number";
     public static final String OPTION_LIMIT_DESCRIPTION = "The number of messages to delete";
 
-    private static final OptionData limitOption = new OptionData(OptionType.INTEGER, OPTION_LIMIT_NAME, OPTION_LIMIT_DESCRIPTION, true).setRequiredRange(1, 100);
+    private static final OptionData limitOption = new OptionData(OptionType.INTEGER, OPTION_LIMIT_NAME, OPTION_LIMIT_DESCRIPTION, true).setRequiredRange(1, UPPER_LIMIT);
     private static final CommandData commandData = Commands.slash(COMMAND_NAME, COMMAND_DESCRIPTION)
             .addOptions(limitOption)
             .setDefaultEnabled(false);
@@ -38,23 +42,21 @@ public class PruneChatSlashCommand implements ICommand {
 
         Integer limit = event.getOption(OPTION_LIMIT_NAME, null, OptionMapping::getAsInt);
 
-        if (limit == null || limit < 1 || limit > 100) {
-            event.getHook().sendMessage("Please provide a valid limit between 1-100").queue();
+        if (limit == null || limit < 1 || limit > UPPER_LIMIT) {
+            event.getHook().sendMessageFormat("Please provide a valid limit between 1-%d", UPPER_LIMIT).queue();
             return;
         }
 
         event.getHook().sendMessage(String.format("Deleting last %d messages...", limit)).queue();
 
         TextChannel tx = event.getTextChannel();
-        tx.getIterableHistory().limit(limit).submit()
-                .thenCompose(messages -> {
-                    List<Message> collect = messages.stream().filter(message -> !message.isPinned()).toList();
-                    return tx.deleteMessages(collect).submit();
-                })
-                .whenComplete((ok, error) -> {
-                    if (error != null) {
-                        event.getHook().editOriginal(String.format("Uh-oh, something went wrong...(%s)", error.getMessage())).queue();
-                    }
-                });
+        tx.getIterableHistory().limit(limit).queue(messages -> {
+                    List<AuditableRestAction<Void>> collect = messages.stream()
+                            .filter(message -> !message.isPinned())
+                            .map(Message::delete)
+                            .toList();
+                    RestAction.allOf(collect).mapToResult().queue();
+                }
+        );
     }
 }

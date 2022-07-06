@@ -36,8 +36,7 @@ public class LoggedMessage {
     private List<LoggedMessageContent> contentHistory = new LinkedList<>();
 
 
-    @ElementCollection(fetch = FetchType.LAZY)
-    @CollectionTable(name = "nsa_logged_attachments")
+    @OneToMany(mappedBy="loggedMessage", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Builder.Default
     private List<LoggedAttachment> attachmentList = new LinkedList<>();
 

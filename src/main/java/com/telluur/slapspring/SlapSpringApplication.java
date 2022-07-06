@@ -42,21 +42,4 @@ public class SlapSpringApplication {
         return new EventWaiter();
     }
 
-
-    @Bean
-    public CommandLineRunner testnsa(@Autowired LoggedMessageRepository repo){
-        return (args) -> {
-            LoggedMessage loggedMessage = new LoggedMessage();
-            loggedMessage.setId(1);
-            loggedMessage.setChannelId(2);
-            loggedMessage.setUserId(3);
-            loggedMessage.setJumpUrl("url");
-            loggedMessage.appendContentHistory("first msg");
-            LoggedMessage save = repo.save(loggedMessage);
-            System.out.println("Called save()");
-            System.out.println(save != null ? save.toString() : "null");
-        };
-
-    }
-
 }

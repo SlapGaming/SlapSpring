@@ -16,6 +16,5 @@ import javax.persistence.*;
 @Setter
 public class LoggedMessageContent {
 
-    @Column(nullable = false)
     private String contentRaw;
 }

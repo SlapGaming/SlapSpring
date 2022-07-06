@@ -5,7 +5,8 @@ import lombok.*;
 import javax.persistence.*;
 
 //JPA
-@Embeddable
+@Entity
+@Table(name = "nsa_logged_attachments")
 
 //Lombok
 @Builder
@@ -14,6 +15,13 @@ import javax.persistence.*;
 @Getter
 @Setter
 public class LoggedAttachment {
+    @Id
+    private long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "loggedMessage_id")
+    private LoggedMessage loggedMessage;
+
     private String name, extension, contentType;
 
     @Lob
