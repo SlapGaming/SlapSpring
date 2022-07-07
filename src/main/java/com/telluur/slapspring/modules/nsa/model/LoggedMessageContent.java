@@ -16,5 +16,7 @@ import javax.persistence.*;
 @Setter
 public class LoggedMessageContent {
 
+    @Lob
+    @Column(columnDefinition="TEXT")
     private String contentRaw;
 }

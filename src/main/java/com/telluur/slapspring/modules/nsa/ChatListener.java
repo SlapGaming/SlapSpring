@@ -6,7 +6,6 @@ import com.telluur.slapspring.modules.nsa.model.LoggedMessage;
 import com.telluur.slapspring.modules.nsa.model.LoggedMessageContent;
 import com.telluur.slapspring.modules.nsa.model.LoggedMessageRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.message.GenericMessageEvent;
@@ -67,6 +66,7 @@ public class ChatListener extends ListenerAdapter {
                                     la.setContent(content);
 
                                     la.setName(attachment.getFileName());
+
                                     la.setContentType(attachment.getContentType());
 
                                     return la;
@@ -90,7 +90,7 @@ public class ChatListener extends ListenerAdapter {
             List<LoggedAttachment> loggedAttachments = attachmentFutures.stream()
                     .map(CompletableFuture::join)
                     .peek(la -> la.setLoggedMessage(loggedMessage)) //Set two way reference
-                    .toList();
+                    .toList(); //note: preceding peek() needs fully evaluating terminal in stream
 
 
             loggedMessage.setAttachmentList(loggedAttachments);
