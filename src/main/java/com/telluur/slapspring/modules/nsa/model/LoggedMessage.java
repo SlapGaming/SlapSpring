@@ -24,11 +24,13 @@ public class LoggedMessage {
     @Column(nullable = false)
     private long channelId, userId;
 
+    private long referencedMessageId;
+
+    private String jumpUrl;
+
     @Builder.Default
     private boolean deleted = false;
 
-    private String jumpUrl;
-    //@ElementCollection(fetch = FetchType.EAGER)
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "nsa_logged_messagecontent")
     @OrderColumn

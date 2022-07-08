@@ -69,4 +69,22 @@ public class NSAWebController {
         }
     }
 
+    @GetMapping(value = "/attachments/{attachmentId}/{ignoredFileName}")
+    ResponseEntity<Resource> downloadAttachmentWithFilePlaceholder(@PathVariable Long attachmentId) {
+        LoggedAttachment la = attachmentRepository.findById(attachmentId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        ByteArrayResource bar = new ByteArrayResource(la.getContent());
+
+
+        try {
+            HttpHeaders responseHeaders = new HttpHeaders();
+            MediaType mediaType = MediaType.parseMediaType(la.getContentType());
+            responseHeaders.setContentType(mediaType);
+            return new ResponseEntity<Resource>(bar, responseHeaders, HttpStatus.OK);
+        } catch (InvalidMediaTypeException | InvalidMimeTypeException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Could not determine the MimeType of the requested resource.");
+        }
+    }
+
 }

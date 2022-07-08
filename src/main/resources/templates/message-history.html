@@ -55,11 +55,12 @@
 
             <img th:if="${entry.getContentType().contains('image')}" th:src="@{/attachments/{id}(id=${entry.getId()})}" />
 
-
+            <video th:if="${entry.getContentType().contains('video')}" controls>
+                <source th:src="@{/attachments/{id}(id=${entry.getId()})}" th:type="${entry.getContentType()}">
+                Your browser does not support the video tag.
+            </video>
         </div>
     </div>
-
-
 </div>
 
 </body>

@@ -6,6 +6,7 @@ import com.telluur.slapspring.modules.nsa.model.LoggedMessage;
 import com.telluur.slapspring.modules.nsa.model.LoggedMessageContent;
 import com.telluur.slapspring.modules.nsa.model.LoggedMessageRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.message.GenericMessageEvent;
@@ -85,6 +86,12 @@ public class ChatListener extends ListenerAdapter {
             loggedMessage.setChannelId(message.getChannel().getIdLong());
             loggedMessage.setUserId(message.getAuthor().getIdLong());
             loggedMessage.setJumpUrl(message.getJumpUrl());
+
+            Message refMsg = message.getReferencedMessage();
+            if (refMsg != null) {
+                loggedMessage.setReferencedMessageId(refMsg.getIdLong());
+            }
+
             loggedMessage.appendContentHistory(message.getContentRaw());
 
             List<LoggedAttachment> loggedAttachments = attachmentFutures.stream()
@@ -118,14 +125,7 @@ public class ChatListener extends ListenerAdapter {
             LoggedMessage loggedMessage = optionalLoggedMessage.get();
             Message eventMessage = event.getMessage();
 
-            String channelTypeString = switch (event.getChannelType()) {
-                case TEXT -> "Text Channel";
-                case VOICE -> "Voice Channel";
-                case GUILD_PUBLIC_THREAD -> "Public Thread";
-                case GUILD_PRIVATE_THREAD -> "Private Thread";
-                default -> "Unknown Channel Type";
-            };
-
+            String channelTypeString = channelTypeToString(event.getChannelType());
 
             List<LoggedMessageContent> contentHistory = loggedMessage.getContentHistory();
             String oldRaw = contentHistory.get(contentHistory.size() - 1).getContentRaw();
@@ -159,7 +159,7 @@ public class ChatListener extends ListenerAdapter {
                 );
                 MessageEmbed me = new EmbedBuilder()
                         .setColor(NSA_COLOR)
-                        .setTitle("NSA: A message was edited")
+                        .setTitle("A message was edited")
                         .setDescription(description)
                         .build();
 
@@ -168,8 +168,6 @@ public class ChatListener extends ListenerAdapter {
 
                 loggedMessage.appendContentHistory(eventMessage.getContentRaw());
                 messageRepository.save(loggedMessage);
-
-
             }
 
 
@@ -193,17 +191,48 @@ public class ChatListener extends ListenerAdapter {
                         .filter(la -> !eventAttachmentIds.contains(la.getId()))
                         .toList();
 
+
                 //TODO this only souts the deleted attachment. Create embed and mark deleted.
                 //TODO create http endpoint for displaying the attachments.
-                deletedAttachments.forEach(a -> System.out.println(a.getName()));
+                deletedAttachments.forEach(a -> {
+
+                    String description = """
+                            
+                            
+                            """;
+
+                    MessageEmbed me = new EmbedBuilder()
+                            .setColor(Color.RED)
+                            .setTitle("An attachment was deleted")
+                            .setDescription()
+                            .build();
+
+                    session.getNSATX().sendMessageEmbeds(me).queue();
+
+                    a.setDeleted(true); //Saved later
+                });
+
+                messageRepository.save(loggedMessage);
 
             }
+
         }
     }
 
     @Override
     public void onMessageDelete(@NotNull MessageDeleteEvent event) {
         System.out.println("MessageDeleteEvent");
+    }
+
+
+    private String channelTypeToString(ChannelType channelType) {
+        return switch (channelType) {
+            case TEXT -> "Text Channel";
+            case VOICE -> "Voice Channel";
+            case GUILD_PUBLIC_THREAD -> "Public Thread";
+            case GUILD_PRIVATE_THREAD -> "Private Thread";
+            default -> "Unknown Channel Type";
+        };
     }
 
 
