@@ -1,67 +1,97 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Slapbot | Message History</title>
-
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Message History</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
 </head>
 <body>
-<h1>Message History</h1>
-<div th:if="${loggedMessage}">
-    <div>
-        <h2>Message Stats</h2>
-        <strong>Message ID: </strong><span th:text="${loggedMessage.getId()}"></span><br>
-        <strong>User ID: </strong><span th:text="${loggedMessage.getUserId()}"></span><br>
-        <strong>Channel ID: </strong><span th:text="${loggedMessage.getChannelId()}"></span><br>
-        <strong>Jump URL: </strong><a th:href="${loggedMessage.getJumpUrl()}"
-                                      th:text="${loggedMessage.getJumpUrl()}"></a><br>
-        <br>
-        <div th:with="deleted = ${loggedMessage.isDeleted()}">
-            <div th:if="${deleted}">
-                <strong>Deleted: </strong><span>True</span>
-            </div>
-            <div th:unless="${deleted}">
-                <strong>Deleted: </strong><span>False</span>
-            </div>
-        </div>
-        <br>
-    </div>
+<div class="container" th:if="${loggedMessage}">
+    <h1>Message History</h1>
+    <div class="row">
+        <div class="col-lg-4 my-3">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h2 class="card-title">Message Stats</h2>
+                    <span th:if="${loggedMessage.isDeleted()}" class="badge bg-danger">Deleted</span>
+                    <p class="card-text">
+                        <strong>Message ID: </strong><span th:text="${loggedMessage.getId()}"></span><br>
+                        <strong>User: </strong><span th:text="${userName}"></span><br>
+                        <strong>Channel: </strong><span th:text="${channelName}"></span><br>
+                        <strong>Timestamp: </strong><span
+                            th:text="${loggedMessage.getTimestamp().toGMTString()}"></span><br>
 
-    <div th:with="history = ${loggedMessage.getContentHistory()}">
-        <h2>Content History</h2>
-        <div th:each="entry : ${history}" style="border: 1px solid black;margin: 5px;">
-            <strong>Edit #: </strong><span th:text="${history.indexOf(entry)}"></span><br>
-            <strong>Message:</strong><br><span th:text="${entry.getContentRaw()}" style="word-wrap: break-word;"></span><br>
-        </div>
-    </div>
-
-    <div th:with="attachments = ${loggedMessage.getAttachmentList()}">
-        <h2 th:if="${attachments.size() > 0}">Attachments</h2>
-        <div th:each="entry : ${attachments}" style="border: 1px solid black;margin: 5px;">
-            <strong>File name: </strong><span th:text="${entry.getName()}"></span><br>
-            <strong>Attachment ID: </strong><span th:text="${entry.getId()}"></span><br>
-            <strong>Content Type: </strong><span th:text="${entry.getContentType()}"></span><br>
-            <strong>URL: </strong><a th:href="@{/attachments/{id}(id=${entry.getId()})}">Link to content</a><br>
-
-            <br>
-            <div th:with="deleted = ${entry.isDeleted()}">
-                <div th:if="${deleted}">
-                    <strong>Deleted: </strong><span>True</span>
-                </div>
-                <div th:unless="${deleted}">
-                    <strong>Deleted: </strong><span>False</span>
+                        <span th:if="${loggedMessage.isDeleted()}">
+                            <strong>Deleted at: </strong>
+                            <span th:text="${loggedMessage.getDeletedDate().toGMTString()}"></span>
+                        </span>
+                    </p>
+                    <a th:href="${loggedMessage.getJumpUrl()}" class="card-link">Discord Jump Link</a>
                 </div>
             </div>
-            <br>
-
-            <img th:if="${entry.getContentType().contains('image')}" th:src="@{/attachments/{id}(id=${entry.getId()})}" />
-
-            <video th:if="${entry.getContentType().contains('video')}" controls>
-                <source th:src="@{/attachments/{id}(id=${entry.getId()})}" th:type="${entry.getContentType()}">
-                Your browser does not support the video tag.
-            </video>
+        </div>
+        <div class="col-lg-8 my-3">
+            <div class="card shadow">
+                <div class="card-body" th:with="history = ${loggedMessage.getContentHistory()}">
+                    <h2 class="card-title">Content History</h2>
+                    <div class="card shadow-sm my-1" th:each="entry : ${history}">
+                        <h6 class="card-header" th:text="${'Edit ' + history.indexOf(entry)}"></h6>
+                        <div class="card-body">
+                            <p class="card-text" th:text="${entry.getContentRaw()}"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+    <th:block th:with="attachments = ${loggedMessage.getAttachmentList()}">
+        <div class="row" th:if="${attachments.size() > 0}">
+            <div class="col-lg-12 my-3">
+                <div class="card shadow">
+                    <div class="card-body">
+                        <h2 class="card-title">Attachments</h2>
+
+                        <div class="row justify-content-lg-center">
+                            <div class="col-lg-4" th:each="entry : ${attachments}">
+                                <div class="card shadow-sm my-1">
+                                    <h6 class="card-header" th:text="${entry.getName()}"></h6>
+                                    <div class="card-body">
+                                        <span class="badge bg-danger" th:if="${entry.isDeleted()}">Deleted</span>
+                                        <p class="card-text">
+                                            <strong>Attachment ID: </strong><span th:text="${entry.getId()}"></span><br>
+                                            <strong>Content Type: </strong><span
+                                                th:text="${entry.getContentType()}"></span><br>
+
+                                            <span th:if="${entry.isDeleted()}">
+                                                <strong>Deleted at: </strong>
+                                                <span th:text="${entry.getDeletedDate().toGMTString()}"></span>
+                                            </span>
+                                        </p>
+                                        <a class="card-link" th:href="@{/attachments/{id}/{filename}(id=${entry.getId()}, filename=${entry.getName()})}">
+                                            Link to content
+                                        </a>
+                                    </div>
+                                    <img class="card-img-bottom" th:if="${entry.getContentType().contains('image')}"
+                                         th:src="@{/attachments/{id}/{filename}(id=${entry.getId()}, filename=${entry.getName()})}"/>
+                                    <video class="ratio" th:if="${entry.getContentType().contains('video')}" controls>
+                                        <source th:src="@{/attachments/{id}/{filename}(id=${entry.getId()}, filename=${entry.getName()})}"
+                                                th:type="${entry.getContentType()}">
+                                        Your browser does not support the video tag.
+                                    </video>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </th:block>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2"
+        crossorigin="anonymous"></script>
 </body>
 </html>

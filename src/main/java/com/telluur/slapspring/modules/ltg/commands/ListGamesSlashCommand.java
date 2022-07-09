@@ -1,14 +1,14 @@
 package com.telluur.slapspring.modules.ltg.commands;
 
-import com.telluur.slapspring.modules.ltg.LTGUtil;
-import com.telluur.slapspring.modules.ltg.model.LTGGame;
-import com.telluur.slapspring.modules.ltg.model.LTGGameRepository;
-import com.telluur.slapspring.core.discord.BotSession;
 import com.telluur.slapspring.abstractions.discord.commands.ICommand;
 import com.telluur.slapspring.abstractions.discord.paginator.IPaginator;
 import com.telluur.slapspring.abstractions.discord.paginator.PaginatorException;
 import com.telluur.slapspring.abstractions.discord.paginator.PaginatorPage;
+import com.telluur.slapspring.core.discord.BotSession;
 import com.telluur.slapspring.modules.ltg.LTGQuickSubscribeService;
+import com.telluur.slapspring.modules.ltg.LTGUtil;
+import com.telluur.slapspring.modules.ltg.model.LTGGame;
+import com.telluur.slapspring.modules.ltg.model.LTGGameRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.Guild;
@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 public class ListGamesSlashCommand extends ListenerAdapter implements ICommand, IPaginator {
     public static final String COMMAND_NAME = "listgames";
     public static final String COMMAND_DESCRIPTION = "Show all available Looking-To-Game roles.";
-    private static final CommandData commandData = Commands.slash(COMMAND_NAME, COMMAND_DESCRIPTION).setDefaultEnabled(true);
+    private static final CommandData commandData = Commands.slash(COMMAND_NAME, COMMAND_DESCRIPTION).setGuildOnly(true);
     private static final String LIST_GAMES_PAGINATOR_ID = "LIST-GAMES";
     private static final int PAGE_SIZE = 10;
 

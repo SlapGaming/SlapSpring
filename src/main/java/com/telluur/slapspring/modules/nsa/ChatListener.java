@@ -5,15 +5,18 @@ import com.telluur.slapspring.modules.nsa.model.LoggedAttachment;
 import com.telluur.slapspring.modules.nsa.model.LoggedMessage;
 import com.telluur.slapspring.modules.nsa.model.LoggedMessageContent;
 import com.telluur.slapspring.modules.nsa.model.LoggedMessageRepository;
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.ChannelType;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.MessageBuilder;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.GenericMessageEvent;
 import net.dv8tion.jda.api.events.message.MessageDeleteEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.MessageUpdateEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,61 +24,66 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.awt.*;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
-import java.util.*;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
+import static com.telluur.slapspring.util.discord.DiscordUtil.channelTypeToString;
 
+@Slf4j
 @Service
 public class ChatListener extends ListenerAdapter {
-    private static final Color NSA_COLOR = new Color(1, 1, 222);
-
-    private static final String LINE = "\u2015";
+    private static final Color NSA_EDIT_COLOR = new Color(1, 1, 222);
+    private static final Color NSA_DELETION_COLOR = Color.RED;
 
     private static final int CHAR_LIMIT = 1500;
 
-
-    private final Map<String, Message> db = new HashMap<>();
-
     @Autowired
-    LoggedMessageRepository messageRepository;
+    private LoggedMessageRepository messageRepository;
 
     @Autowired
     private BotSession session;
 
+    @Autowired
+    private String baseUrl;
+
     @Override
     public void onMessageReceived(@NotNull MessageReceivedEvent event) {
-        System.out.println("MessageReceivedEvent");
         //Skip bot messages, and non-focussed channels
         if (event.getAuthor().isBot() || !inFocusChannel(event)) {
             return;
         }
 
-        System.out.println("Saving message");
-
         Message message = event.getMessage();
-        List<CompletableFuture<LoggedAttachment>> attachmentFutures = message.getAttachments().stream()
-                .map(attachment -> {
-                            CompletableFuture<InputStream> download = attachment.getProxy().download();
-                            return download.thenApply(inputStream -> {
-                                try (inputStream) {
-                                    LoggedAttachment la = new LoggedAttachment();
-                                    la.setId(attachment.getIdLong());
+        List<CompletableFuture<LoggedAttachment>> attachmentFutures = message.getAttachments()
+                .stream()
+                .map(attachment -> attachment.getProxy()
+                        .download()
+                        .thenApply(inputStream -> {
+                            try {
+                                LoggedAttachment la = new LoggedAttachment();
+                                la.setId(attachment.getIdLong());
 
-                                    byte[] content = inputStream.readAllBytes();
-                                    la.setContent(content);
+                                byte[] content = inputStream.readAllBytes();
+                                la.setContent(content);
 
-                                    la.setName(attachment.getFileName());
+                                la.setName(attachment.getFileName());
 
-                                    la.setContentType(attachment.getContentType());
-
-                                    return la;
-                                } catch (IOException e) {
-                                    return null;
-                                }
-                            });
-                        }
+                                la.setContentType(attachment.getContentType());
+                                log.warn(attachment.getContentType());
+                                return la;
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }).handle((loggedAttachment, throwable) -> {
+                            if (throwable != null) {
+                                log.warn("Failed to download attachment {}", attachment.getProxyUrl(), throwable);
+                                return null;
+                            } else {
+                                return loggedAttachment;
+                            }
+                        })
                 ).toList();
         CompletableFuture<Void> allFutures = CompletableFuture.allOf(
                 attachmentFutures.toArray(new CompletableFuture[0])
@@ -96,25 +104,29 @@ public class ChatListener extends ListenerAdapter {
 
             List<LoggedAttachment> loggedAttachments = attachmentFutures.stream()
                     .map(CompletableFuture::join)
+                    .filter(Objects::nonNull)
                     .peek(la -> la.setLoggedMessage(loggedMessage)) //Set two way reference
                     .toList(); //note: preceding peek() needs fully evaluating terminal in stream
-
 
             loggedMessage.setAttachmentList(loggedAttachments);
             messageRepository.save(loggedMessage);
         });
-
     }
 
     @Transactional
     @Override
     public void onMessageUpdate(@NotNull MessageUpdateEvent event) {
-        System.out.println("MessageUpdateEvent");
+        //Skip bot messages, and non-focussed channels
+        if (event.getAuthor().isBot() || !inFocusChannel(event)) {
+            return;
+        }
+
+        log.warn("MessageUpdateEvent");
         long msgId = event.getMessageIdLong();
         Optional<LoggedMessage> optionalLoggedMessage = messageRepository.findById(msgId);
 
-        if (inFocusChannel(event) && optionalLoggedMessage.isPresent()) {
-            System.out.println("Updating a logged message");
+        if (optionalLoggedMessage.isPresent()) {
+            log.warn("Updating a logged message");
             /*
              * An update might be fired for multiple reasons, here we filter 2, both are always fired separately:
              * - text content of a message has changed
@@ -125,8 +137,6 @@ public class ChatListener extends ListenerAdapter {
             LoggedMessage loggedMessage = optionalLoggedMessage.get();
             Message eventMessage = event.getMessage();
 
-            String channelTypeString = channelTypeToString(event.getChannelType());
-
             List<LoggedMessageContent> contentHistory = loggedMessage.getContentHistory();
             String oldRaw = contentHistory.get(contentHistory.size() - 1).getContentRaw();
             String newRaw = eventMessage.getContentRaw();
@@ -135,7 +145,7 @@ public class ChatListener extends ListenerAdapter {
 
                 String description = String.format("""
                                 **%s:** %s
-                                **Member:** %s (%s#%s)
+                                **Member:** %s (%s)
                                 **Edit number:** %d
                                                     
                                 **\u2015\u2015\u2015\u2015\u2015 \u25BCOLD\u25BC \u2015\u2015\u2015\u2015\u2015**
@@ -148,23 +158,26 @@ public class ChatListener extends ListenerAdapter {
                                                             
                                  **\u2015\u2015\u2015\u2015\u2015 \u25B2NEW\u25B2 \u2015\u2015\u2015\u2015\u2015**
                                 """,
-                        channelTypeString,
+                        channelTypeToString(event.getChannelType()),
                         event.getTextChannel().getName(),
                         Objects.requireNonNull(event.getMember()).getAsMention(), //Checked by event.isFromGuild()
-                        event.getAuthor().getName(),
-                        event.getAuthor().getDiscriminator(),
+                        event.getAuthor().getAsTag(),
                         contentHistory.size(),
                         oldRaw.length() <= CHAR_LIMIT ? oldRaw : oldRaw.substring(0, CHAR_LIMIT) + "...",
                         newRaw.length() <= CHAR_LIMIT ? newRaw : newRaw.substring(0, CHAR_LIMIT) + "..."
                 );
                 MessageEmbed me = new EmbedBuilder()
-                        .setColor(NSA_COLOR)
+                        .setColor(NSA_EDIT_COLOR)
                         .setTitle("A message was edited")
                         .setDescription(description)
                         .build();
 
+                Message m = new MessageBuilder()
+                        .setEmbeds(me)
+                        .setActionRows(archiveButton(msgId))
+                        .build();
 
-                session.getNSATX().sendMessageEmbeds(me).queue();
+                session.getNSATX().sendMessage(m).queue();
 
                 loggedMessage.appendContentHistory(eventMessage.getContentRaw());
                 messageRepository.save(loggedMessage);
@@ -177,7 +190,7 @@ public class ChatListener extends ListenerAdapter {
                     .toList();
             List<Message.Attachment> eventAttachments = eventMessage.getAttachments();
             if (loggedLiveAttachments.size() > eventAttachments.size()) {
-                System.out.println("Attachment deletion");
+                log.warn("Attachment deletion");
                 /*
                  * A single (!) attachment has been deleted from a message that contains text or multiple attachments
                  * Client forces confirmation for deletion on single attachment. Assumption: Unlikely that a single update would fire for multiple.
@@ -191,48 +204,142 @@ public class ChatListener extends ListenerAdapter {
                         .filter(la -> !eventAttachmentIds.contains(la.getId()))
                         .toList();
 
+                deletedAttachments.forEach(la -> {
+                    la.setDeleted(); //Saved later
 
-                //TODO this only souts the deleted attachment. Create embed and mark deleted.
-                //TODO create http endpoint for displaying the attachments.
-                deletedAttachments.forEach(a -> {
+                    String attUrl = attachmentUrl(la);
 
-                    String description = """
-                            
-                            
-                            """;
+                    String description = String.format("""
+                                    **%s:** %s
+                                    **Member:** %s (%s)
+                                                                        
+                                    **File name:** %s
+                                    **Content Type:** %s
+                                    **NSA Link:** %s
+                                    """,
+                            channelTypeToString(event.getChannelType()),
+                            event.getTextChannel().getName(),
+                            Objects.requireNonNull(event.getMember()).getAsMention(), //Checked by event.isFromGuild()
+                            event.getAuthor().getAsTag(),
+                            la.getName(),
+                            la.getContentType(),
+                            attUrl);
 
-                    MessageEmbed me = new EmbedBuilder()
-                            .setColor(Color.RED)
-                            .setTitle("An attachment was deleted")
-                            .setDescription()
-                            .build();
-
-                    session.getNSATX().sendMessageEmbeds(me).queue();
-
-                    a.setDeleted(true); //Saved later
+                    sendAttachmentDeletionLog(msgId, la, description);
                 });
-
                 messageRepository.save(loggedMessage);
-
             }
-
         }
     }
 
+    @Transactional
     @Override
     public void onMessageDelete(@NotNull MessageDeleteEvent event) {
-        System.out.println("MessageDeleteEvent");
+        //Skip non-focussed channels
+        if (!inFocusChannel(event)) {
+            return;
+        }
+        log.warn("MessageDeleteEvent");
+
+        long msgId = event.getMessageIdLong();
+        Optional<LoggedMessage> optionalLoggedMessage = messageRepository.findById(msgId);
+
+        if (optionalLoggedMessage.isPresent()) {
+            log.warn("Deleting a logged message");
+
+            LoggedMessage loggedMessage = optionalLoggedMessage.get();
+
+            Guild guild = session.getBoundGuild();
+            Member member = guild.getMemberById(loggedMessage.getUserId());
+            String memberMention = member != null ? member.getAsMention() : "<NON SLAP>";
+
+            User user = session.getJda().getUserById(loggedMessage.getUserId());
+            String userMention = user != null ? user.getAsTag() : "<UNKNOWN>";
+
+
+            List<LoggedMessageContent> contentHistory = loggedMessage.getContentHistory();
+            if (contentHistory.size() > 0) {
+                String contentRaw = contentHistory.get(contentHistory.size() - 1).getContentRaw();
+
+                String description = String.format("""
+                                **%s:** %s
+                                **Member:** %s (%s)
+                                                    
+                                **\u2015\u2015\u2015\u2015\u2015 \u25BCOLD\u25BC \u2015\u2015\u2015\u2015\u2015**
+                                                            
+                                %s
+                                                            
+                                 **\u2015\u2015\u2015\u2015\u2015 \u25B2OLD\u25B2 \u2015\u2015\u2015\u2015\u2015**
+                                """,
+                        channelTypeToString(event.getChannelType()),
+                        event.getTextChannel().getName(),
+                        memberMention,
+                        userMention,
+                        contentRaw.length() <= CHAR_LIMIT ? contentRaw : contentRaw.substring(0, CHAR_LIMIT) + "...");
+
+                MessageEmbed me = new EmbedBuilder()
+                        .setColor(NSA_DELETION_COLOR)
+                        .setTitle("A message was deleted")
+                        .setDescription(description)
+                        .build();
+
+                Message m = new MessageBuilder()
+                        .setEmbeds(me)
+                        .setActionRows(archiveButton(msgId))
+                        .build();
+
+                session.getNSATX().sendMessage(m).queue();
+
+                loggedMessage.setDeleted(); //Saved later
+            }
+
+            loggedMessage.getAttachmentList().stream()
+                    .filter(la -> !la.isDeleted())
+                    .forEach(la -> {
+                        la.setDeleted(); //Saved later
+
+                        String attUrl = attachmentUrl(la);
+                        String description = String.format("""
+                                        **%s:** %s
+                                        **Member:** %s (%s)
+                                                                            
+                                        **File name:** %s
+                                        **Content Type:** %s
+                                        **NSA Link:** %s
+                                        """,
+                                channelTypeToString(event.getChannelType()),
+                                event.getTextChannel().getName(),
+                                memberMention,
+                                userMention,
+                                la.getName(),
+                                la.getContentType(),
+                                attUrl);
+
+                        sendAttachmentDeletionLog(msgId, la, description);
+                    });
+            messageRepository.save(loggedMessage);
+        }
     }
 
+    private void sendAttachmentDeletionLog(long msgId, LoggedAttachment la, String embedDescription) {
+        MessageEmbed me = new EmbedBuilder()
+                .setColor(NSA_DELETION_COLOR)
+                .setTitle("An attachment was deleted")
+                .setDescription(embedDescription)
+                .build();
 
-    private String channelTypeToString(ChannelType channelType) {
-        return switch (channelType) {
-            case TEXT -> "Text Channel";
-            case VOICE -> "Voice Channel";
-            case GUILD_PUBLIC_THREAD -> "Public Thread";
-            case GUILD_PRIVATE_THREAD -> "Private Thread";
-            default -> "Unknown Channel Type";
-        };
+        Message m = new MessageBuilder()
+                .setEmbeds(me)
+                .setActionRows(archiveButton(msgId))
+                .build();
+
+        MessageAction embedMessageAction = session.getNSATX().sendMessage(m);
+        if (la.getContentType().contains("image") || la.getContentType().contains("video")) {
+            MessageAction mediaUrlMessageAction = session.getNSATX().sendMessage(attachmentUrl(la));
+            embedMessageAction.and(mediaUrlMessageAction).queue();
+        } else {
+            embedMessageAction.queue();
+        }
     }
 
 
@@ -246,5 +353,15 @@ public class ChatListener extends ListenerAdapter {
         return event.isFromGuild()
                 && event.getGuild().equals(session.getBoundGuild())
                 && !event.getChannel().equals(session.getNSATX());
+    }
+
+
+    private String attachmentUrl(LoggedAttachment loggedAttachment) {
+        return String.format("%s/attachments/%s/%s", baseUrl, loggedAttachment.getId(), loggedAttachment.getName());
+    }
+
+    private ActionRow archiveButton(Long messageId) {
+        String url = String.format("%s/messages/%d", baseUrl, messageId);
+        return ActionRow.of(Button.link(url, "Show History"));
     }
 }

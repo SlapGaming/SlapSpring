@@ -1,7 +1,7 @@
 package com.telluur.slapspring.modules.commands;
 
-import com.telluur.slapspring.core.discord.BotProperties;
 import com.telluur.slapspring.abstractions.discord.commands.ICommand;
+import com.telluur.slapspring.core.discord.BotProperties;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 

@@ -3,6 +3,7 @@ package com.telluur.slapspring.modules.nsa.model;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.Date;
 
 //JPA
 @Entity
@@ -27,6 +28,14 @@ public class LoggedAttachment {
     @Lob
     private byte[] content;
 
-    @Builder.Default
-    private boolean deleted = false;
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date deletedDate;
+
+    public boolean isDeleted() {
+        return deletedDate != null;
+    }
+
+    public void setDeleted() {
+        deletedDate = new Date(System.currentTimeMillis());
+    }
 }

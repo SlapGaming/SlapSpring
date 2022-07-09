@@ -1,14 +1,14 @@
 package com.telluur.slapspring.modules.ltg.commands;
 
-import com.telluur.slapspring.modules.ltg.LTGQuickSubscribeService;
-import com.telluur.slapspring.modules.ltg.LTGUtil;
-import com.telluur.slapspring.modules.ltg.model.LTGGame;
-import com.telluur.slapspring.modules.ltg.model.LTGGameRepository;
-import com.telluur.slapspring.core.discord.BotSession;
 import com.telluur.slapspring.abstractions.discord.commands.ICommand;
 import com.telluur.slapspring.abstractions.discord.paginator.IPaginator;
 import com.telluur.slapspring.abstractions.discord.paginator.PaginatorException;
 import com.telluur.slapspring.abstractions.discord.paginator.PaginatorPage;
+import com.telluur.slapspring.core.discord.BotSession;
+import com.telluur.slapspring.modules.ltg.LTGQuickSubscribeService;
+import com.telluur.slapspring.modules.ltg.LTGUtil;
+import com.telluur.slapspring.modules.ltg.model.LTGGame;
+import com.telluur.slapspring.modules.ltg.model.LTGGameRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
@@ -38,7 +38,7 @@ public class GameInfoSlashCommand implements ICommand, IPaginator {
     public static final String OPTION_ROLE_NAME = "role";
     public static final String OPTION_ROLE_DESCRIPTION = "Looking-To-Game role";
     private static final OptionData ROLE_OPTION = new OptionData(OptionType.ROLE, OPTION_ROLE_NAME, OPTION_ROLE_DESCRIPTION, true);
-    private static final CommandData COMMAND_DATA = Commands.slash(COMMAND_NAME, COMMAND_DESCRIPTION).addOptions(ROLE_OPTION).setDefaultEnabled(true);
+    private static final CommandData COMMAND_DATA = Commands.slash(COMMAND_NAME, COMMAND_DESCRIPTION).addOptions(ROLE_OPTION).setGuildOnly(true);
     private static final String GAME_INFO_PAGINATOR_ID = "GAME-INFO";
     private static final int PAGE_SIZE = 10;
 

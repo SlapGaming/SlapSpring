@@ -1,10 +1,10 @@
 package com.telluur.slapspring.modules.ltg.commands;
 
+import com.telluur.slapspring.abstractions.discord.commands.ICommand;
+import com.telluur.slapspring.core.discord.BotSession;
 import com.telluur.slapspring.modules.ltg.LTGUtil;
 import com.telluur.slapspring.modules.ltg.model.LTGGame;
 import com.telluur.slapspring.modules.ltg.model.LTGGameRepository;
-import com.telluur.slapspring.core.discord.BotSession;
-import com.telluur.slapspring.abstractions.discord.commands.ICommand;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
@@ -31,7 +31,7 @@ public class AddGameSlashCommand extends ListenerAdapter implements ICommand {
     public static final String MODAL_ID = "LTG_ADD_MODAL";
     public static final String MODAL_ABBRV = "LTG_ADD_ABBRV";
     public static final String MODAL_NAME = "LTG_ADD_DESC";
-    private static final CommandData commandData = Commands.slash(COMMAND_NAME, COMMAND_DESCRIPTION).setDefaultEnabled(false);
+    private static final CommandData commandData = Commands.slash(COMMAND_NAME, COMMAND_DESCRIPTION);
 
     @Autowired
     LTGGameRepository gameRepository;

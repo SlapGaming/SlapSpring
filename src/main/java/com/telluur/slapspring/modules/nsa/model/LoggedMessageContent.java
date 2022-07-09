@@ -3,6 +3,7 @@ package com.telluur.slapspring.modules.nsa.model;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.Date;
 
 //JPA
 @Embeddable
@@ -17,6 +18,10 @@ import javax.persistence.*;
 public class LoggedMessageContent {
 
     @Lob
-    @Column(columnDefinition="TEXT")
+    @Column(columnDefinition = "TEXT")
     private String contentRaw;
+
+    @Builder.Default
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date timestamp = new Date(System.currentTimeMillis());
 }

@@ -12,6 +12,11 @@ spring:
     database-platform: com.telluur.slapspring.util.jpa.CustomMariaDB103Dialect
     show-sql: false
 
+server:
+  tomcat:
+    remoteip:
+      remote-ip-header: "x-forwarded-for"
+      protocol-header: "x-forwarded-proto"
 jda:
   token: ${DISCORD_TOKEN}
   status-type: ${DISCORD_STATUS_TYPE}
@@ -26,3 +31,4 @@ jda:
   tx-general: ${DISCORD_TX_GENERAL}
   tx-ltg: ${DISCORD_TX_LTG}
   tx-nsa: ${DISCORD_TX_NSA}
+  web-base-url: ${SPRING_ENDPOINT_BASE}

@@ -3,6 +3,7 @@ package com.telluur.slapspring.modules.commands;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import org.springframework.stereotype.Service;
@@ -16,7 +17,7 @@ public class UnregisterCommand extends AbstractRestrictedCommand {
     public static final String COMMAND_NAME = "unregister";
     public static final String COMMAND_DESCRIPTION = "Unregisters all commands from global and bound guild.";
     private static final CommandData commandData = Commands.slash(COMMAND_NAME, COMMAND_DESCRIPTION)
-            .setDefaultEnabled(false);
+            .setGuildOnly(true).setDefaultPermissions(DefaultMemberPermissions.DISABLED);
 
     @Nonnull
     @Override

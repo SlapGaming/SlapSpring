@@ -12,5 +12,6 @@ import java.util.List;
 public record BotProperties(@Nonnull @ToString.Exclude String token, @Nonnull String status_type,
                             @Nonnull String status_message, @Nonnull String guild, @Nonnull List<String> system_users,
                             @Nonnull String role_admin, @Nonnull String role_mod, @Nonnull String role_community,
-                            @Nonnull String tx_general, @Nonnull String tx_ltg, @Nonnull String tx_nsa) {
+                            @Nonnull String tx_general, @Nonnull String tx_ltg, @Nonnull String tx_nsa,
+                            @Nonnull String web_base_url) {
 }

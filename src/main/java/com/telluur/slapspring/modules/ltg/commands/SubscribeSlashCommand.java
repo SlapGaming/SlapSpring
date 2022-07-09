@@ -40,7 +40,7 @@ public class SubscribeSlashCommand implements ICommand {
     private static final CommandData commandData = Commands.slash(COMMAND_NAME, COMMAND_DESCRIPTION)
             .addOptions(roleOption)
             .addOptions(varRoleOptions)
-            .setDefaultEnabled(true);
+            .setGuildOnly(true);
 
     @Autowired
     LTGRoleService ltgRoleService;

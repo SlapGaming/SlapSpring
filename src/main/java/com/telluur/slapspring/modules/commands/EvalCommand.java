@@ -2,6 +2,7 @@ package com.telluur.slapspring.modules.commands;
 
 import com.telluur.slapspring.core.discord.BotSession;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
@@ -22,7 +23,7 @@ public class EvalCommand extends AbstractRestrictedCommand {
 
     private static final CommandData commandData = Commands.slash(COMMAND_NAME, COMMAND_DESCRIPTION)
             .addOption(OptionType.STRING, OPTION_NASHORN_NAME, OPTION_NASHORN_DESCRIPTION, true)
-            .setDefaultEnabled(false);
+            .setGuildOnly(true).setDefaultPermissions(DefaultMemberPermissions.DISABLED);
 
     @Autowired
     private BotSession botSession;

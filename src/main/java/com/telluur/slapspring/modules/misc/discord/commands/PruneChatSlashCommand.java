@@ -4,6 +4,7 @@ import com.telluur.slapspring.abstractions.discord.commands.ICommand;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
@@ -18,17 +19,15 @@ import java.util.List;
 
 @Service
 public class PruneChatSlashCommand implements ICommand {
-    private static final int UPPER_LIMIT = 100;
-
     public static final String COMMAND_NAME = "prune";
     public static final String COMMAND_DESCRIPTION = "Deletes the last <limit> messages in a textchannel, skips pinned messages.";
     public static final String OPTION_LIMIT_NAME = "number";
     public static final String OPTION_LIMIT_DESCRIPTION = "The number of messages to delete";
-
+    private static final int UPPER_LIMIT = 100;
     private static final OptionData limitOption = new OptionData(OptionType.INTEGER, OPTION_LIMIT_NAME, OPTION_LIMIT_DESCRIPTION, true).setRequiredRange(1, UPPER_LIMIT);
     private static final CommandData commandData = Commands.slash(COMMAND_NAME, COMMAND_DESCRIPTION)
             .addOptions(limitOption)
-            .setDefaultEnabled(false);
+            .setGuildOnly(true).setDefaultPermissions(DefaultMemberPermissions.DISABLED);
 
     @Nonnull
     @Override

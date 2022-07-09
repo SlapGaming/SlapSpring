@@ -2,6 +2,7 @@ package com.telluur.slapspring.modules.misc.discord.commands;
 
 import com.telluur.slapspring.abstractions.discord.commands.ICommand;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
@@ -19,7 +20,7 @@ public class SaySlashCommand implements ICommand {
 
     private static final CommandData commandData = Commands.slash(COMMAND_NAME, COMMAND_DESCRIPTION)
             .addOption(OptionType.STRING, OPTION_MESSAGE_NAME, OPTION_MESSAGE_DESCRIPTION, true)
-            .setDefaultEnabled(false);
+            .setGuildOnly(true).setDefaultPermissions(DefaultMemberPermissions.DISABLED);
 
 
     @Nonnull

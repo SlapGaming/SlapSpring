@@ -15,7 +15,7 @@ public class VersionSlashCommand implements ICommand {
     public static final String COMMAND_NAME = "version";
     public static final String COMMAND_DESCRIPTION = "Displays the bot's version.";
     public static final String VERSION = Optional.ofNullable(SlapSpringApplication.class.getPackage().getImplementationVersion()).orElse("DEV");
-    private static final CommandData commandData = Commands.slash(COMMAND_NAME, COMMAND_DESCRIPTION).setDefaultEnabled(true);
+    private static final CommandData commandData = Commands.slash(COMMAND_NAME, COMMAND_DESCRIPTION).setGuildOnly(true);
 
     @Nonnull
     @Override

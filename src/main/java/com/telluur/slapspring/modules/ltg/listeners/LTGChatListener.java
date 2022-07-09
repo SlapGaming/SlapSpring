@@ -1,7 +1,7 @@
 package com.telluur.slapspring.modules.ltg.listeners;
 
-import com.telluur.slapspring.modules.ltg.LTGQuickSubscribeService;
 import com.telluur.slapspring.core.discord.BotProperties;
+import com.telluur.slapspring.modules.ltg.LTGQuickSubscribeService;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
