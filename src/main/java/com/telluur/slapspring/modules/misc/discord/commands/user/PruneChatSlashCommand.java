@@ -1,4 +1,4 @@
-package com.telluur.slapspring.modules.misc.discord.commands;
+package com.telluur.slapspring.modules.misc.discord.commands.user;
 
 import com.telluur.slapspring.abstractions.discord.commands.ICommand;
 import net.dv8tion.jda.api.entities.Message;

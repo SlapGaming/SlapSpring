@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'com.telluur'
-version = '0.0.1-SNAPSHOT'
+version = '3.0'
 sourceCompatibility = '17'
 
 configurations {

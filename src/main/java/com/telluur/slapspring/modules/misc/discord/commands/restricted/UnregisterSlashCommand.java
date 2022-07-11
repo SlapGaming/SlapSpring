@@ -1,4 +1,4 @@
-package com.telluur.slapspring.modules.commands;
+package com.telluur.slapspring.modules.misc.discord.commands.restricted;
 
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Guild;
@@ -13,7 +13,7 @@ import java.util.Objects;
 
 @Service
 @Slf4j
-public class UnregisterCommand extends AbstractRestrictedCommand {
+public class UnregisterSlashCommand extends AbstractRestrictedSlashCommand {
     public static final String COMMAND_NAME = "unregister";
     public static final String COMMAND_DESCRIPTION = "Unregisters all commands from global and bound guild.";
     private static final CommandData commandData = Commands.slash(COMMAND_NAME, COMMAND_DESCRIPTION)

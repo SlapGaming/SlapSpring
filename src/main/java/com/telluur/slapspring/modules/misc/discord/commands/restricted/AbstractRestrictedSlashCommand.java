@@ -1,4 +1,4 @@
-package com.telluur.slapspring.modules.commands;
+package com.telluur.slapspring.modules.misc.discord.commands.restricted;
 
 import com.telluur.slapspring.abstractions.discord.commands.ICommand;
 import com.telluur.slapspring.core.discord.BotProperties;
@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
 
-abstract class AbstractRestrictedCommand implements ICommand {
+abstract class AbstractRestrictedSlashCommand implements ICommand {
     @Autowired
     BotProperties botProperties;
 

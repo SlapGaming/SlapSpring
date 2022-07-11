@@ -4,7 +4,6 @@ import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
 import com.telluur.slapspring.core.discord.BotProperties;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
-import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -28,7 +27,6 @@ public class SlapSpringApplication {
         //logger.info("Bot config: {}", botProperties.toString());
         return JDABuilder
                 .create(botProperties.token(), EnumSet.allOf(GatewayIntent.class))
-                .setActivity(Activity.of(Activity.ActivityType.COMPETING, "SPRING"))
                 .addEventListeners(waiter)
                 .build()
                 .awaitReady();

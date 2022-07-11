@@ -1,10 +1,10 @@
 package com.telluur.slapspring.modules.deprecation;
 
 import com.telluur.slapspring.modules.avatar.commands.AvatarSlashCommand;
-import com.telluur.slapspring.modules.commands.EvalCommand;
-import com.telluur.slapspring.modules.commands.KillCommand;
 import com.telluur.slapspring.modules.ltg.commands.*;
-import com.telluur.slapspring.modules.misc.discord.commands.*;
+import com.telluur.slapspring.modules.misc.discord.commands.restricted.EvalSlashCommand;
+import com.telluur.slapspring.modules.misc.discord.commands.restricted.KillSlashCommand;
+import com.telluur.slapspring.modules.misc.discord.commands.user.*;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -24,11 +24,11 @@ public class DotCommandDeprecationListener extends ListenerAdapter {
     public static final List<String> deprecatedPrefixes = List.of(".", "!");
 
     public static final Map<String, String> commandMappings = Map.ofEntries(
-            entry("eval", EvalCommand.COMMAND_NAME),
+            entry("eval", EvalSlashCommand.COMMAND_NAME),
 
-            entry("kill", KillCommand.COMMAND_NAME),
-            entry("fuckoff", KillCommand.COMMAND_NAME),
-            entry("die", KillCommand.COMMAND_NAME),
+            entry("kill", KillSlashCommand.COMMAND_NAME),
+            entry("fuckoff", KillSlashCommand.COMMAND_NAME),
+            entry("die", KillSlashCommand.COMMAND_NAME),
 
             entry("prune", PruneChatSlashCommand.COMMAND_NAME),
             entry("clear", PruneChatSlashCommand.COMMAND_NAME),
@@ -55,7 +55,7 @@ public class DotCommandDeprecationListener extends ListenerAdapter {
 
             entry("roll", RollSlashCommand.COMMAND_NAME),
             //TODO
-            entry("teams", "UNIMPLEMENTED"),
+            entry("teams", TeamsSlashCommand.COMMAND_NAME),
             //TODO
             entry("about", "UNIMPLEMENTED"),
 
@@ -80,13 +80,16 @@ public class DotCommandDeprecationListener extends ListenerAdapter {
                                 .setFooter("This message will self-destruct after 30 seconds.")
                                 .build();
                         event.getChannel().sendMessageEmbeds(deprecationNotice).submit()
+                                .thenCompose(message -> {
+                                    MessageEmbed me = new EmbedBuilder()
+                                            .setColor(Color.RED)
+                                            .setImage("https://c.tenor.com/hO1oLqo-lKIAAAAd/tom-scott-explosion.gif")
+                                            .build();
+                                    return message.editMessageEmbeds(me).submitAfter(30, TimeUnit.SECONDS);
+                                })
                                 .thenCompose(message -> message.delete()//delete notice
                                         .and(event.getMessage().delete()) //delete command
-                                        .submitAfter(30, TimeUnit.SECONDS)
-                                )
-                                .whenComplete((v, e) -> {
-                                    //Ignore errors.
-                                });
+                                        .submitAfter(10, TimeUnit.SECONDS));
                         return; //early return
                     }
                 }
