@@ -28,19 +28,19 @@ public class AvatarSlashCommand implements ICommand {
     public static final String OPTION_TYPE_CHOICE_GUILD = "server";
 
 
-    private static final OptionData memberOption = new OptionData(OptionType.USER, OPTION_MEMBER_NAME, OPTION_MEMBER_DESCRIPTION, true);
-    private static final OptionData typeOption = new OptionData(OptionType.STRING, OPTION_TYPE_NAME, OPTION_TYPE_DESCRIPTION, false)
+    private static final OptionData MEMBER_OPTION = new OptionData(OptionType.USER, OPTION_MEMBER_NAME, OPTION_MEMBER_DESCRIPTION, true);
+    private static final OptionData TYPE_OPTION = new OptionData(OptionType.STRING, OPTION_TYPE_NAME, OPTION_TYPE_DESCRIPTION, false)
             .addChoice(OPTION_TYPE_CHOICE_GLOBAL, OPTION_TYPE_CHOICE_GLOBAL)
             .addChoice(OPTION_TYPE_CHOICE_GUILD, OPTION_TYPE_CHOICE_GUILD);
 
-    private static final CommandData commandData = Commands.slash(COMMAND_NAME, COMMAND_DESCRIPTION)
-            .addOptions(memberOption, typeOption)
+    private static final CommandData COMMAND_DATA = Commands.slash(COMMAND_NAME, COMMAND_DESCRIPTION)
+            .addOptions(MEMBER_OPTION, TYPE_OPTION)
             .setGuildOnly(true);
 
     @Nonnull
     @Override
     public CommandData data() {
-        return commandData;
+        return COMMAND_DATA;
     }
 
     @Override

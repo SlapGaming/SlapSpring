@@ -14,8 +14,9 @@ import javax.annotation.Nonnull;
 public class KillSlashCommand extends AbstractRestrictedSlashCommand {
     public static final String COMMAND_NAME = "kill";
     public static final String COMMAND_DESCRIPTION = "Attempts a shutdown of the Spring container.";
-    private static final CommandData commandData = Commands.slash(COMMAND_NAME, COMMAND_DESCRIPTION)
-            .setGuildOnly(true).setDefaultPermissions(DefaultMemberPermissions.DISABLED);
+    private static final CommandData COMMAND_DATA = Commands.slash(COMMAND_NAME, COMMAND_DESCRIPTION)
+            .setGuildOnly(true)
+            .setDefaultPermissions(DefaultMemberPermissions.DISABLED);
 
     @Autowired
     private ConfigurableApplicationContext springApplication;
@@ -23,7 +24,7 @@ public class KillSlashCommand extends AbstractRestrictedSlashCommand {
     @Nonnull
     @Override
     public CommandData data() {
-        return commandData;
+        return COMMAND_DATA;
     }
 
     @Override

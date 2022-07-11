@@ -21,9 +21,10 @@ public class EvalSlashCommand extends AbstractRestrictedSlashCommand {
     public static final String OPTION_NASHORN_NAME = "nashorn";
     public static final String OPTION_NASHORN_DESCRIPTION = "The nashorn code to be executed";
 
-    private static final CommandData commandData = Commands.slash(COMMAND_NAME, COMMAND_DESCRIPTION)
+    private static final CommandData COMMAND_DATA = Commands.slash(COMMAND_NAME, COMMAND_DESCRIPTION)
             .addOption(OptionType.STRING, OPTION_NASHORN_NAME, OPTION_NASHORN_DESCRIPTION, true)
-            .setGuildOnly(true).setDefaultPermissions(DefaultMemberPermissions.DISABLED);
+            .setGuildOnly(true)
+            .setDefaultPermissions(DefaultMemberPermissions.DISABLED);
 
     @Autowired
     private BotSession botSession;
@@ -31,7 +32,7 @@ public class EvalSlashCommand extends AbstractRestrictedSlashCommand {
     @Nonnull
     @Override
     public CommandData data() {
-        return commandData;
+        return COMMAND_DATA;
     }
 
     @Override

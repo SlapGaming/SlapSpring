@@ -1,6 +1,7 @@
 package com.telluur.slapspring.modules.misc.discord.commands.restricted;
 
 import lombok.extern.slf4j.Slf4j;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
@@ -16,13 +17,14 @@ import java.util.Objects;
 public class UnregisterSlashCommand extends AbstractRestrictedSlashCommand {
     public static final String COMMAND_NAME = "unregister";
     public static final String COMMAND_DESCRIPTION = "Unregisters all commands from global and bound guild.";
-    private static final CommandData commandData = Commands.slash(COMMAND_NAME, COMMAND_DESCRIPTION)
-            .setGuildOnly(true).setDefaultPermissions(DefaultMemberPermissions.DISABLED);
+    private static final CommandData COMMAND_DATA = Commands.slash(COMMAND_NAME, COMMAND_DESCRIPTION)
+            .setGuildOnly(true)
+            .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR));
 
     @Nonnull
     @Override
     public CommandData data() {
-        return commandData;
+        return COMMAND_DATA;
     }
 
     @Override

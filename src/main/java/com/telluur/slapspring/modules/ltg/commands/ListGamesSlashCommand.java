@@ -34,7 +34,8 @@ import java.util.stream.Collectors;
 public class ListGamesSlashCommand extends ListenerAdapter implements ICommand, IPaginator {
     public static final String COMMAND_NAME = "listgames";
     public static final String COMMAND_DESCRIPTION = "Show all available Looking-To-Game roles.";
-    private static final CommandData commandData = Commands.slash(COMMAND_NAME, COMMAND_DESCRIPTION).setGuildOnly(true);
+    private static final CommandData COMMAND_DATA = Commands.slash(COMMAND_NAME, COMMAND_DESCRIPTION)
+            .setGuildOnly(true);
     private static final String LIST_GAMES_PAGINATOR_ID = "LIST-GAMES";
     private static final int PAGE_SIZE = 10;
 
@@ -50,7 +51,7 @@ public class ListGamesSlashCommand extends ListenerAdapter implements ICommand, 
     @Nonnull
     @Override
     public CommandData data() {
-        return commandData;
+        return COMMAND_DATA;
     }
 
 

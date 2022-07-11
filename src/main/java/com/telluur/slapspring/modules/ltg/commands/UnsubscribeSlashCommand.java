@@ -30,14 +30,14 @@ public class UnsubscribeSlashCommand implements ICommand {
     public static final String OPTION_ROLE_DESCRIPTION = "The game role you want to leave";
     public static final String OPTION_VAR_ROLE_DESCRIPTION = "The additional roles your want to leave";
 
-    private static final OptionData roleOption = new OptionData(OptionType.ROLE, OPTION_ROLE_NAME + 1, OPTION_ROLE_DESCRIPTION, true);
+    private static final OptionData ROLE_OPTION = new OptionData(OptionType.ROLE, OPTION_ROLE_NAME + 1, OPTION_ROLE_DESCRIPTION, true);
 
-    private static final List<OptionData> varRoleOptions = IntStream.range(2, 26)
+    private static final List<OptionData> VAR_ROLE_OPTIONS = IntStream.range(2, 26)
             .mapToObj(i -> new OptionData(OptionType.ROLE, OPTION_ROLE_NAME + i, OPTION_VAR_ROLE_DESCRIPTION, false))
             .toList();
-    private static final CommandData commandData = Commands.slash(COMMAND_NAME, COMMAND_DESCRIPTION)
-            .addOptions(roleOption)
-            .addOptions(varRoleOptions)
+    private static final CommandData COMMAND_DATA = Commands.slash(COMMAND_NAME, COMMAND_DESCRIPTION)
+            .addOptions(ROLE_OPTION)
+            .addOptions(VAR_ROLE_OPTIONS)
             .setGuildOnly(true);
 
     @Autowired
@@ -49,7 +49,7 @@ public class UnsubscribeSlashCommand implements ICommand {
     @Nonnull
     @Override
     public CommandData data() {
-        return commandData;
+        return COMMAND_DATA;
     }
 
     @Override

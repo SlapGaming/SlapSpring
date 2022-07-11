@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
@@ -31,7 +32,9 @@ public class AddGameSlashCommand extends ListenerAdapter implements ICommand {
     public static final String MODAL_ID = "LTG_ADD_MODAL";
     public static final String MODAL_ABBRV = "LTG_ADD_ABBRV";
     public static final String MODAL_NAME = "LTG_ADD_DESC";
-    private static final CommandData commandData = Commands.slash(COMMAND_NAME, COMMAND_DESCRIPTION);
+    private static final CommandData COMMAND_DATA = Commands.slash(COMMAND_NAME, COMMAND_DESCRIPTION)
+            .setGuildOnly(true)
+            .setDefaultPermissions(DefaultMemberPermissions.DISABLED);
 
     @Autowired
     LTGGameRepository gameRepository;
@@ -45,7 +48,7 @@ public class AddGameSlashCommand extends ListenerAdapter implements ICommand {
     @Nonnull
     @Override
     public CommandData data() {
-        return commandData;
+        return COMMAND_DATA;
     }
 
     @Override

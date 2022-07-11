@@ -38,7 +38,9 @@ public class GameInfoSlashCommand implements ICommand, IPaginator {
     public static final String OPTION_ROLE_NAME = "role";
     public static final String OPTION_ROLE_DESCRIPTION = "Looking-To-Game role";
     private static final OptionData ROLE_OPTION = new OptionData(OptionType.ROLE, OPTION_ROLE_NAME, OPTION_ROLE_DESCRIPTION, true);
-    private static final CommandData COMMAND_DATA = Commands.slash(COMMAND_NAME, COMMAND_DESCRIPTION).addOptions(ROLE_OPTION).setGuildOnly(true);
+    private static final CommandData COMMAND_DATA = Commands.slash(COMMAND_NAME, COMMAND_DESCRIPTION)
+            .addOptions(ROLE_OPTION)
+            .setGuildOnly(true);
     private static final String GAME_INFO_PAGINATOR_ID = "GAME-INFO";
     private static final int PAGE_SIZE = 10;
 

@@ -19,9 +19,11 @@ public class RollSlashCommand implements ICommand {
     public static final String OPTION_BOUND_NAME = "bound";
     public static final String OPTION_BOUND_DESCRIPTION = "The upper bound";
 
-    private static final OptionData boundOption = new OptionData(OptionType.INTEGER, OPTION_BOUND_NAME, OPTION_BOUND_DESCRIPTION, true).setMinValue(2);
-    private static final CommandData commandData = Commands.slash(COMMAND_NAME, COMMAND_DESCRIPTION)
-            .addOptions(boundOption).setGuildOnly(true);
+    private static final OptionData BOUND_OPTION = new OptionData(OptionType.INTEGER, OPTION_BOUND_NAME, OPTION_BOUND_DESCRIPTION, true)
+            .setMinValue(2);
+    private static final CommandData COMMAND_DATA = Commands.slash(COMMAND_NAME, COMMAND_DESCRIPTION)
+            .addOptions(BOUND_OPTION)
+            .setGuildOnly(true);
 
 
     private final Random rand = new Random();
@@ -29,7 +31,7 @@ public class RollSlashCommand implements ICommand {
     @Nonnull
     @Override
     public CommandData data() {
-        return commandData;
+        return COMMAND_DATA;
     }
 
 

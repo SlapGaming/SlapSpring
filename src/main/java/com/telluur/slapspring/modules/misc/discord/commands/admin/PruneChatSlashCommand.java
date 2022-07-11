@@ -1,4 +1,4 @@
-package com.telluur.slapspring.modules.misc.discord.commands.user;
+package com.telluur.slapspring.modules.misc.discord.commands.admin;
 
 import com.telluur.slapspring.abstractions.discord.commands.ICommand;
 import net.dv8tion.jda.api.entities.Message;
@@ -24,15 +24,16 @@ public class PruneChatSlashCommand implements ICommand {
     public static final String OPTION_LIMIT_NAME = "number";
     public static final String OPTION_LIMIT_DESCRIPTION = "The number of messages to delete";
     private static final int UPPER_LIMIT = 100;
-    private static final OptionData limitOption = new OptionData(OptionType.INTEGER, OPTION_LIMIT_NAME, OPTION_LIMIT_DESCRIPTION, true).setRequiredRange(1, UPPER_LIMIT);
-    private static final CommandData commandData = Commands.slash(COMMAND_NAME, COMMAND_DESCRIPTION)
-            .addOptions(limitOption)
-            .setGuildOnly(true).setDefaultPermissions(DefaultMemberPermissions.DISABLED);
+    private static final OptionData LIMIT_OPTION = new OptionData(OptionType.INTEGER, OPTION_LIMIT_NAME, OPTION_LIMIT_DESCRIPTION, true).setRequiredRange(1, UPPER_LIMIT);
+    private static final CommandData COMMAND_DATA = Commands.slash(COMMAND_NAME, COMMAND_DESCRIPTION)
+            .addOptions(LIMIT_OPTION)
+            .setGuildOnly(true)
+            .setDefaultPermissions(DefaultMemberPermissions.DISABLED);
 
     @Nonnull
     @Override
     public CommandData data() {
-        return commandData;
+        return COMMAND_DATA;
     }
 
     @Override

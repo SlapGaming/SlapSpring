@@ -1,4 +1,4 @@
-package com.telluur.slapspring.modules.misc.discord.commands.user;
+package com.telluur.slapspring.modules.misc.discord.commands.admin;
 
 import com.telluur.slapspring.abstractions.discord.commands.ICommand;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -18,15 +18,16 @@ public class SaySlashCommand implements ICommand {
     public static final String OPTION_MESSAGE_NAME = "message";
     public static final String OPTION_MESSAGE_DESCRIPTION = "The message to be echoed";
 
-    private static final CommandData commandData = Commands.slash(COMMAND_NAME, COMMAND_DESCRIPTION)
+    private static final CommandData COMMAND_DATA = Commands.slash(COMMAND_NAME, COMMAND_DESCRIPTION)
             .addOption(OptionType.STRING, OPTION_MESSAGE_NAME, OPTION_MESSAGE_DESCRIPTION, true)
-            .setGuildOnly(true).setDefaultPermissions(DefaultMemberPermissions.DISABLED);
+            .setGuildOnly(true)
+            .setDefaultPermissions(DefaultMemberPermissions.DISABLED);
 
 
     @Nonnull
     @Override
     public CommandData data() {
-        return commandData;
+        return COMMAND_DATA;
     }
 
 
