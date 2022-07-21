@@ -61,7 +61,7 @@ public class AddGameSlashCommand extends ListenerAdapter implements ICommand {
 
         TextInput name = TextInput.create(MODAL_NAME, "Full Game Name", TextInputStyle.SHORT)
                 .setRequired(true)
-                .setRequiredRange(1, 25)
+                .setRequiredRange(1, 50)
                 .setPlaceholder("Battlefield 3")
                 .build();
 
@@ -90,7 +90,7 @@ public class AddGameSlashCommand extends ListenerAdapter implements ICommand {
                 return;
             }
 
-            if (!fullname.chars().allMatch(Character::isLetterOrDigit)) {
+            if (!fullname.chars().allMatch(i -> Character.isLetterOrDigit(i) || Character.isSpaceChar(i))) {
                 String message = "Failed to create LTG Role.\r\n" +
                         "The name contains a non-alphanumeric character.";
                 MessageEmbed me = LTGUtil.failureEmbed(message);
