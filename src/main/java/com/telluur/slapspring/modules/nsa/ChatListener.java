@@ -71,7 +71,6 @@ public class ChatListener extends ListenerAdapter {
                                 la.setName(attachment.getFileName());
 
                                 la.setContentType(attachment.getContentType());
-                                log.warn(attachment.getContentType());
                                 return la;
                             } catch (IOException e) {
                                 throw new RuntimeException(e);
@@ -121,12 +120,10 @@ public class ChatListener extends ListenerAdapter {
             return;
         }
 
-        log.warn("MessageUpdateEvent");
         long msgId = event.getMessageIdLong();
         Optional<LoggedMessage> optionalLoggedMessage = messageRepository.findById(msgId);
 
         if (optionalLoggedMessage.isPresent()) {
-            log.warn("Updating a logged message");
             /*
              * An update might be fired for multiple reasons, here we filter 2, both are always fired separately:
              * - text content of a message has changed
@@ -190,7 +187,6 @@ public class ChatListener extends ListenerAdapter {
                     .toList();
             List<Message.Attachment> eventAttachments = eventMessage.getAttachments();
             if (loggedLiveAttachments.size() > eventAttachments.size()) {
-                log.warn("Attachment deletion");
                 /*
                  * A single (!) attachment has been deleted from a message that contains text or multiple attachments
                  * Client forces confirmation for deletion on single attachment. Assumption: Unlikely that a single update would fire for multiple.
@@ -239,13 +235,11 @@ public class ChatListener extends ListenerAdapter {
         if (!inFocusChannel(event)) {
             return;
         }
-        log.warn("MessageDeleteEvent");
 
         long msgId = event.getMessageIdLong();
         Optional<LoggedMessage> optionalLoggedMessage = messageRepository.findById(msgId);
 
         if (optionalLoggedMessage.isPresent()) {
-            log.warn("Deleting a logged message");
 
             LoggedMessage loggedMessage = optionalLoggedMessage.get();
 
