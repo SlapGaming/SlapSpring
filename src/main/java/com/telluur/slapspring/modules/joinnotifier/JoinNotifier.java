@@ -12,11 +12,9 @@ import java.awt.*;
 
 @Service
 public class JoinNotifier extends ListenerAdapter {
-    private final BotSession botSession;
 
-    public JoinNotifier(@Autowired BotSession bot) {
-        this.botSession = bot;
-    }
+    @Autowired
+    private BotSession botSession;
 
     public void onGuildMemberJoin(GuildMemberJoinEvent event) {
         Member member = event.getMember();

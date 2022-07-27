@@ -24,17 +24,12 @@ public class SlapSpringApplication {
 
     @Bean
     public JDA initJDA(@Autowired BotProperties botProperties, @Autowired EventWaiter waiter) throws LoginException, InterruptedException {
-        //logger.info("Bot config: {}", botProperties.toString());
+        logger.info("Bot config: {}", botProperties.toString());
         return JDABuilder
                 .create(botProperties.token(), EnumSet.allOf(GatewayIntent.class))
                 .addEventListeners(waiter)
                 .build()
                 .awaitReady();
-    }
-
-    @Bean
-    public EventWaiter eventWaiter() {
-        return new EventWaiter();
     }
 
     @Bean
