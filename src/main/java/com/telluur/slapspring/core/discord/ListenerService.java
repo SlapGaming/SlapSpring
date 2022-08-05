@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 public class ListenerService {
 
     @Autowired
-    private List<ListenerAdapter> listeners;
+    JDA jda;
 
     @Autowired
     private List<ListenerAdapter> listeners;
