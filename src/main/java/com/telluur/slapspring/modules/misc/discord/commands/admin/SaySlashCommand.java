@@ -38,7 +38,7 @@ public class SaySlashCommand implements ICommand {
         if (payload == null) {
             event.getHook().sendMessage("Please enter a valid message.").queue();
         } else {
-            event.getTextChannel().sendMessage(payload).submit()
+            event.getChannel().sendMessage(payload).submit()
                     .thenCompose(ok -> event.getHook().sendMessage("Echoed your message.").submit());
         }
     }

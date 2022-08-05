@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -20,7 +19,8 @@ import java.util.stream.Collectors;
 public class ListenerService {
 
     @Autowired
-    private JDA jda;
+    private List<ListenerAdapter> listeners;
+
     @Autowired
     private List<ListenerAdapter> listeners;
 
