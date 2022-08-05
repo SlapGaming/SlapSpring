@@ -2,7 +2,6 @@ package com.telluur.slapspring.modules.misc.discord.commands.admin;
 
 import com.telluur.slapspring.abstractions.discord.commands.ICommand;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -49,8 +48,7 @@ public class PruneChatSlashCommand implements ICommand {
 
         event.getHook().sendMessage(String.format("Deleting last %d messages...", limit)).queue();
 
-        TextChannel tx = event.getTextChannel();
-        tx.getIterableHistory().limit(limit).queue(messages -> {
+        event.getChannel().getIterableHistory().limit(limit).queue(messages -> {
                     List<AuditableRestAction<Void>> collect = messages.stream()
                             .filter(message -> !message.isPinned())
                             .map(Message::delete)

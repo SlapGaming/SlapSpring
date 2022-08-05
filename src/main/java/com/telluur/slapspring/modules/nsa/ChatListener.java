@@ -156,7 +156,7 @@ public class ChatListener extends ListenerAdapter {
                                  **\u2015\u2015\u2015\u2015\u2015 \u25B2NEW\u25B2 \u2015\u2015\u2015\u2015\u2015**
                                 """,
                         channelTypeToString(event.getChannelType()),
-                        event.getTextChannel().getName(),
+                        event.getChannel().getName(),
                         Objects.requireNonNull(event.getMember()).getAsMention(), //Checked by event.isFromGuild()
                         event.getAuthor().getAsTag(),
                         contentHistory.size(),
@@ -214,7 +214,7 @@ public class ChatListener extends ListenerAdapter {
                                     **NSA Link:** %s
                                     """,
                             channelTypeToString(event.getChannelType()),
-                            event.getTextChannel().getName(),
+                            event.getChannel().getName(),
                             Objects.requireNonNull(event.getMember()).getAsMention(), //Checked by event.isFromGuild()
                             event.getAuthor().getAsTag(),
                             la.getName(),
@@ -266,7 +266,7 @@ public class ChatListener extends ListenerAdapter {
                                  **\u2015\u2015\u2015\u2015\u2015 \u25B2OLD\u25B2 \u2015\u2015\u2015\u2015\u2015**
                                 """,
                         channelTypeToString(event.getChannelType()),
-                        event.getTextChannel().getName(),
+                        event.getChannel().getName(),
                         memberMention,
                         userMention,
                         contentRaw.length() <= CHAR_LIMIT ? contentRaw : contentRaw.substring(0, CHAR_LIMIT) + "...");
@@ -302,7 +302,7 @@ public class ChatListener extends ListenerAdapter {
                                         **NSA Link:** %s
                                         """,
                                 channelTypeToString(event.getChannelType()),
-                                event.getTextChannel().getName(),
+                                event.getChannel().getName(),
                                 memberMention,
                                 userMention,
                                 la.getName(),

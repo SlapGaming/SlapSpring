@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'com.telluur'
-version = '3.3'
+version = '3.4'
 sourceCompatibility = '17'
 
 configurations {
@@ -41,7 +41,7 @@ dependencies {
 
     implementation 'org.mariadb.jdbc:mariadb-java-client:3.0.5'
 
-    implementation 'net.dv8tion:JDA:5.0.0-alpha.13'
+    implementation 'net.dv8tion:JDA:5.0.0-alpha.17'
     implementation 'pw.chew:jda-chewtils:2.0-SNAPSHOT'
 
     implementation 'com.vdurmont:emoji-java:5.1.1'

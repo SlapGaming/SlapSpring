@@ -12,7 +12,6 @@ import java.awt.*;
 
 @Service
 public class JoinNotifier extends ListenerAdapter {
-
     @Autowired
     private BotSession botSession;
 
