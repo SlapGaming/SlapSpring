@@ -28,9 +28,10 @@ public class KillSlashCommand extends AbstractRestrictedSlashCommand {
 
     @Override
     public void systemHandle(SlashCommandInteractionEvent event) {
-        event.reply("Attempting to shutdown Spring application...").setEphemeral(true).queue();
+        event.reply("Shutting down JDA and Spring Container").setEphemeral(true).queue();
 
-        //TODO this does not work...
+        event.getJDA().shutdown();
         springApplication.close();
+        System.exit(0);
     }
 }
