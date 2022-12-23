@@ -3,24 +3,24 @@ package com.telluur.slapspring.modules.ltg;
 import com.telluur.slapspring.core.discord.BotSession;
 import com.telluur.slapspring.modules.ltg.model.LTGGame;
 import com.telluur.slapspring.modules.ltg.model.LTGGameRepository;
-import net.dv8tion.jda.api.MessageBuilder;
+import lombok.NonNull;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
-import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.Component;
 import net.dv8tion.jda.api.interactions.components.ItemComponent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import net.dv8tion.jda.api.interactions.components.selections.SelectMenu;
 import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
+import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -48,11 +48,12 @@ public class LTGQuickSubscribeService extends ListenerAdapter {
 
 
     public void sendQuickSubscribe(Collection<Role> roles) {
-        sendQuickSubscribeWithMessageBuilder(roles, new MessageBuilder());
+        sendQuickSubscribeWithMessageBuilder(roles, new MessageCreateBuilder());
     }
 
-    public void sendQuickSubscribeWithMessage(Collection<Role> roles, String message) {
-        sendQuickSubscribeWithMessageBuilder(roles, new MessageBuilder().appendFormat("%s\r\n", message));
+    public void sendQuickSubscribe(Collection<Role> roles, String message) {
+        String content = String.format("%s\r\n", message);
+        sendQuickSubscribeWithMessageBuilder(roles, new MessageCreateBuilder().addContent(content));
     }
 
 
@@ -65,22 +66,20 @@ public class LTGQuickSubscribeService extends ListenerAdapter {
      *
      * @param roles the Roles the user will be able to join
      */
-    private void sendQuickSubscribeWithMessageBuilder(Collection<Role> roles, @Nonnull MessageBuilder msgBuilder) {
+    private void sendQuickSubscribeWithMessageBuilder(Collection<Role> roles, @NonNull MessageCreateBuilder mcBuilder) {
         Optional<ActionRow> opt = createQSActionRowWithRoles(roles);
         if (opt.isPresent()) {
             ActionRow ltgQuickSubActionRow = opt.get();
             List<ItemComponent> components = ltgQuickSubActionRow.getComponents();
-            if (components.size() == 1 && components.get(0).getType().equals(Component.Type.SELECT_MENU)) {
-                msgBuilder.append("Select the Looking-To-Game roles you wish to join from the dropdown.")
-                        .setActionRows(ltgQuickSubActionRow, ActionRow.of(INFO_BUTTON))
-                        .build();
+            if (components.size() == 1 && components.get(0).getType().equals(Component.Type.STRING_SELECT)) {
+                mcBuilder.addContent("Select the Looking-To-Game roles you wish to join from the dropdown.")
+                        .setComponents(ltgQuickSubActionRow, ActionRow.of(INFO_BUTTON));
             } else {
                 components.add(INFO_BUTTON);
-                msgBuilder.append("Use the buttons below to join Looking-To-Game roles.")
-                        .setActionRows(ltgQuickSubActionRow)
-                        .build();
+                mcBuilder.addContent("Use the buttons below to join Looking-To-Game roles.")
+                        .setComponents(ltgQuickSubActionRow);
             }
-            botSession.getLTGTX().sendMessage(msgBuilder.build()).queue();
+            botSession.getLTGTX().sendMessage(mcBuilder.build()).queue();
         }
     }
 
@@ -110,13 +109,15 @@ public class LTGQuickSubscribeService extends ListenerAdapter {
                     String.format(SUBSCRIBE_ACTION_TEXT, ltgGame.getAbbreviation()),
                     String.valueOf(ltgGame.getId())
             )).toList();
-            ActionRow ltgSelect = ActionRow.of(SelectMenu.create(QUICK_SUBSCRIBE_MENU_ID)
-                    .addOptions(options)
-                    .setMaxValues(25)
-                    .build());
+            ActionRow ltgSelect = ActionRow.of(
+                    StringSelectMenu.create(QUICK_SUBSCRIBE_MENU_ID)
+                            .addOptions(options)
+                            .setMaxValues(25)
+                            .build());
             return Optional.of(ltgSelect);
         }
     }
+
 
     /**
      * Creates the ActionRows for the quick subscribe buttons
@@ -144,16 +145,16 @@ public class LTGQuickSubscribeService extends ListenerAdapter {
 
 
     @Override
-    public void onButtonInteraction(@Nonnull ButtonInteractionEvent event) {
+    public void onButtonInteraction(@NonNull ButtonInteractionEvent event) {
         String buttonId = event.getButton().getId();
         if (buttonId != null && buttonId.startsWith(QUICK_SUBSCRIBE_PREFIX)) {
             event.deferReply(true).queue();
 
             String id = buttonId.substring(QUICK_SUBSCRIBE_PREFIX.length()); //Splits off the QUICK_SUBSCRIBE_PREFIX from the following ID
             Role role = botSession.getBoundGuild().getRoleById(id);
-            Member member = event.getMember();
+            Member member = Objects.requireNonNull(event.getMember()); //Should never be null, as buttons only get posted to guilds.
 
-            if (member != null && role != null) {
+            if (role != null) {
                 ltgRoleService.addMemberToRoleIfLTG(member, role,
                         r -> {
                             MessageEmbed me = LTGUtil.joinSuccessEmbed(r);
@@ -167,12 +168,14 @@ public class LTGQuickSubscribeService extends ListenerAdapter {
             } else {
                 //member should never be null, as the buttons only get posted in the guild.
                 event.getHook().sendMessage("Uh-oh, something went wrong...").queue();
+                MessageEmbed me = LTGUtil.joinFailEmbed("Do the roles in your selection still exist?");
+                event.getHook().sendMessageEmbeds(me).queue();
             }
         }
     }
 
     @Override
-    public void onSelectMenuInteraction(SelectMenuInteractionEvent event) {
+    public void onStringSelectInteraction(StringSelectInteractionEvent event) {
         event.deferReply(true).queue();
 
         if (Objects.requireNonNull(event.getComponent().getId()).equals(QUICK_SUBSCRIBE_MENU_ID)) {

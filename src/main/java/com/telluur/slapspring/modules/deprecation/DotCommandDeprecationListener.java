@@ -10,13 +10,13 @@ import com.telluur.slapspring.modules.misc.discord.commands.user.PingSlashComman
 import com.telluur.slapspring.modules.misc.discord.commands.user.RollSlashCommand;
 import com.telluur.slapspring.modules.misc.discord.commands.user.TeamsSlashCommand;
 import com.telluur.slapspring.modules.misc.discord.commands.user.VersionSlashCommand;
+import lombok.NonNull;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Nonnull;
 import java.awt.*;
 import java.util.List;
 import java.util.Map;
@@ -40,21 +40,21 @@ public class DotCommandDeprecationListener extends ListenerAdapter {
 
             entry("say", SaySlashCommand.COMMAND_NAME),
 
-            entry("games", ListGamesSlashCommand.COMMAND_NAME),
+            entry("games", LTGListGamesSlashCommand.COMMAND_NAME),
 
-            entry("info", GameInfoSlashCommand.COMMAND_NAME),
-            entry("subscriptions", GameInfoSlashCommand.COMMAND_NAME),
-            entry("subs", GameInfoSlashCommand.COMMAND_NAME),
+            entry("info", LTGGameInfoSlashCommand.COMMAND_NAME),
+            entry("subscriptions", LTGGameInfoSlashCommand.COMMAND_NAME),
+            entry("subs", LTGGameInfoSlashCommand.COMMAND_NAME),
 
-            entry("addgame", AddGameSlashCommand.COMMAND_NAME),
+            entry("addgame", LTGAddGameSlashCommand.COMMAND_NAME),
 
-            entry("join", SubscribeSlashCommand.COMMAND_NAME),
-            entry("subscribe", SubscribeSlashCommand.COMMAND_NAME),
-            entry("sub", SubscribeSlashCommand.COMMAND_NAME),
+            entry("join", LTGSubscribeSlashCommand.COMMAND_NAME),
+            entry("subscribe", LTGSubscribeSlashCommand.COMMAND_NAME),
+            entry("sub", LTGSubscribeSlashCommand.COMMAND_NAME),
 
-            entry("leave", UnsubscribeSlashCommand.COMMAND_NAME),
-            entry("unsubscribe", UnsubscribeSlashCommand.COMMAND_NAME),
-            entry("unsub", UnsubscribeSlashCommand.COMMAND_NAME),
+            entry("leave", LTGUnsubscribeSlashCommand.COMMAND_NAME),
+            entry("unsubscribe", LTGUnsubscribeSlashCommand.COMMAND_NAME),
+            entry("unsub", LTGUnsubscribeSlashCommand.COMMAND_NAME),
 
             entry("avatar", AvatarSlashCommand.COMMAND_NAME),
 
@@ -71,7 +71,7 @@ public class DotCommandDeprecationListener extends ListenerAdapter {
 
 
     @Override
-    public void onMessageReceived(@Nonnull MessageReceivedEvent event) {
+    public void onMessageReceived(@NonNull MessageReceivedEvent event) {
         String contentDisplay = event.getMessage().getContentDisplay();
         for (String prefix : deprecatedPrefixes) {
             if (contentDisplay.startsWith(prefix)) {

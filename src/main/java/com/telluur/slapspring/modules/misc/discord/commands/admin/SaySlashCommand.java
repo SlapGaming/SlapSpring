@@ -1,6 +1,7 @@
 package com.telluur.slapspring.modules.misc.discord.commands.admin;
 
 import com.telluur.slapspring.abstractions.discord.commands.ICommand;
+import lombok.NonNull;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -8,8 +9,6 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import org.springframework.stereotype.Service;
-
-import javax.annotation.Nonnull;
 
 @Service
 public class SaySlashCommand implements ICommand {
@@ -24,7 +23,7 @@ public class SaySlashCommand implements ICommand {
             .setDefaultPermissions(DefaultMemberPermissions.DISABLED);
 
 
-    @Nonnull
+    @NonNull
     @Override
     public CommandData data() {
         return COMMAND_DATA;
@@ -32,7 +31,7 @@ public class SaySlashCommand implements ICommand {
 
 
     @Override
-    public void handle(@Nonnull SlashCommandInteractionEvent event) {
+    public void handle(@NonNull SlashCommandInteractionEvent event) {
         event.deferReply(true).queue();
         String payload = event.getOption(OPTION_MESSAGE_NAME, OptionMapping::getAsString);
         if (payload == null) {

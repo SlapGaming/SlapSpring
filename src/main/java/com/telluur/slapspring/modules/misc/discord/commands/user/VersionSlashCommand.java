@@ -2,12 +2,12 @@ package com.telluur.slapspring.modules.misc.discord.commands.user;
 
 import com.telluur.slapspring.SlapSpringApplication;
 import com.telluur.slapspring.abstractions.discord.commands.ICommand;
+import lombok.NonNull;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Nonnull;
 import java.util.Optional;
 
 @Service
@@ -18,14 +18,14 @@ public class VersionSlashCommand implements ICommand {
     private static final CommandData COMMAND_DATA = Commands.slash(COMMAND_NAME, COMMAND_DESCRIPTION)
             .setGuildOnly(true);
 
-    @Nonnull
+    @NonNull
     @Override
     public CommandData data() {
         return COMMAND_DATA;
     }
 
     @Override
-    public void handle(@Nonnull SlashCommandInteractionEvent event) {
+    public void handle(@NonNull SlashCommandInteractionEvent event) {
         event.reply(String.format("SlapBot version: `%s`", VERSION)).setEphemeral(true).queue();
     }
 }

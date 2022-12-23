@@ -2,10 +2,10 @@ package com.telluur.slapspring.modules.ltg.model;
 
 import lombok.*;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 
 
 //JPA
@@ -23,7 +23,7 @@ public class LTGGame {
     @Id
     private long id;
 
-    @Column(nullable = false)
+    @NotNull @NonNull //javax.validation for hibernate table generation, lombok for runtime
     private String abbreviation, fullName;
 
     private String description;

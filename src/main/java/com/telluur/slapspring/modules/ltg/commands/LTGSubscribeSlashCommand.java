@@ -4,6 +4,7 @@ import com.telluur.slapspring.abstractions.discord.commands.ICommand;
 import com.telluur.slapspring.modules.ltg.LTGQuickSubscribeService;
 import com.telluur.slapspring.modules.ltg.LTGRoleService;
 import com.telluur.slapspring.modules.ltg.LTGUtil;
+import lombok.NonNull;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.Role;
@@ -17,14 +18,13 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.IntStream;
 
 
 @Service
-public class SubscribeSlashCommand implements ICommand {
+public class LTGSubscribeSlashCommand implements ICommand {
     public static final String COMMAND_NAME = "subscribe";
     public static final String COMMAND_DESCRIPTION = "Join a @game role.";
     public static final String OPTION_ROLE_NAME = "role";
@@ -52,14 +52,14 @@ public class SubscribeSlashCommand implements ICommand {
     Logger ltgLogger;
 
 
-    @Nonnull
+    @NonNull
     @Override
     public CommandData data() {
         return COMMAND_DATA;
     }
 
     @Override
-    public void handle(@Nonnull SlashCommandInteractionEvent event) {
+    public void handle(@NonNull SlashCommandInteractionEvent event) {
         event.deferReply(true).queue();
 
         List<Role> roles = IntStream.range(1, 26)
@@ -79,7 +79,7 @@ public class SubscribeSlashCommand implements ICommand {
                         event.getHook().sendMessageEmbeds(me).queue();
 
                         String broadcastMsg = LTGUtil.joinBroadcastMessage(member, joinedRoles);
-                        quickSubscribeService.sendQuickSubscribeWithMessage(joinedRoles, broadcastMsg);
+                        quickSubscribeService.sendQuickSubscribe(joinedRoles, broadcastMsg);
                     },
                     fail -> {
                         MessageEmbed me = LTGUtil.joinFailEmbed(fail.getMessage());

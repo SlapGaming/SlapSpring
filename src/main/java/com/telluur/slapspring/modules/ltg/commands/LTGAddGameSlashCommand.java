@@ -5,6 +5,7 @@ import com.telluur.slapspring.core.discord.BotSession;
 import com.telluur.slapspring.modules.ltg.LTGUtil;
 import com.telluur.slapspring.modules.ltg.model.LTGGame;
 import com.telluur.slapspring.modules.ltg.model.LTGGameRepository;
+import lombok.NonNull;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
@@ -14,19 +15,18 @@ import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.Modal;
 import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
+import net.dv8tion.jda.api.interactions.modals.Modal;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Nonnull;
 import java.awt.*;
 import java.util.Objects;
 
 @Service
-public class AddGameSlashCommand extends ListenerAdapter implements ICommand {
+public class LTGAddGameSlashCommand extends ListenerAdapter implements ICommand {
     public static final String COMMAND_NAME = "addgame";
     public static final String COMMAND_DESCRIPTION = "Pop up a modal to create a new LTG game.";
     public static final String MODAL_ID = "LTG_ADD_MODAL";
@@ -45,14 +45,14 @@ public class AddGameSlashCommand extends ListenerAdapter implements ICommand {
     @Autowired
     Logger ltgLogger;
 
-    @Nonnull
+    @NonNull
     @Override
     public CommandData data() {
         return COMMAND_DATA;
     }
 
     @Override
-    public void handle(@Nonnull SlashCommandInteractionEvent event) {
+    public void handle(@NonNull SlashCommandInteractionEvent event) {
         TextInput abbrv = TextInput.create(MODAL_ABBRV, "Abbreviation", TextInputStyle.SHORT)
                 .setRequired(true)
                 .setRequiredRange(1, 6)
@@ -74,7 +74,7 @@ public class AddGameSlashCommand extends ListenerAdapter implements ICommand {
     }
 
     @Override
-    public void onModalInteraction(@Nonnull ModalInteractionEvent event) {
+    public void onModalInteraction(@NonNull ModalInteractionEvent event) {
         if (event.getModalId().equals(MODAL_ID)) {
             event.deferReply(true).queue();
 

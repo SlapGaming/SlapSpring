@@ -1,5 +1,6 @@
 package com.telluur.slapspring.modules.misc.discord.commands.restricted;
 
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
@@ -9,7 +10,6 @@ import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Nonnull;
 import java.util.Objects;
 
 @Service
@@ -21,7 +21,7 @@ public class UnregisterSlashCommand extends AbstractRestrictedSlashCommand {
             .setGuildOnly(true)
             .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR));
 
-    @Nonnull
+    @NonNull
     @Override
     public CommandData data() {
         return COMMAND_DATA;

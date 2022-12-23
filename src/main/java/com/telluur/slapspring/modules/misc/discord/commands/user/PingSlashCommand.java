@@ -1,12 +1,12 @@
 package com.telluur.slapspring.modules.misc.discord.commands.user;
 
 import com.telluur.slapspring.abstractions.discord.commands.ICommand;
+import lombok.NonNull;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Nonnull;
 import java.util.Random;
 
 @Service
@@ -40,14 +40,14 @@ public class PingSlashCommand implements ICommand {
     };
     private final Random random = new Random();
 
-    @Nonnull
+    @NonNull
     @Override
     public CommandData data() {
         return COMMAND_DATA;
     }
 
     @Override
-    public void handle(@Nonnull SlashCommandInteractionEvent event) {
+    public void handle(@NonNull SlashCommandInteractionEvent event) {
         event.deferReply(true).queue();
         long gatewayPing = event.getJDA().getGatewayPing();
 

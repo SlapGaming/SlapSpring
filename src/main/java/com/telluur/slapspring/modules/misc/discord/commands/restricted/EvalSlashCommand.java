@@ -1,6 +1,7 @@
 package com.telluur.slapspring.modules.misc.discord.commands.restricted;
 
 import com.telluur.slapspring.core.discord.BotSession;
+import lombok.NonNull;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -10,7 +11,6 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Nonnull;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
@@ -29,7 +29,7 @@ public class EvalSlashCommand extends AbstractRestrictedSlashCommand {
     @Autowired
     private BotSession botSession;
 
-    @Nonnull
+    @NonNull
     @Override
     public CommandData data() {
         return COMMAND_DATA;

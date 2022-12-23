@@ -1,6 +1,7 @@
 package com.telluur.slapspring.modules.misc.discord.commands.user;
 
 import com.telluur.slapspring.abstractions.discord.commands.ICommand;
+import lombok.NonNull;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -9,7 +10,6 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Nonnull;
 import java.util.Random;
 
 @Service
@@ -28,7 +28,7 @@ public class RollSlashCommand implements ICommand {
 
     private final Random rand = new Random();
 
-    @Nonnull
+    @NonNull
     @Override
     public CommandData data() {
         return COMMAND_DATA;
@@ -36,7 +36,7 @@ public class RollSlashCommand implements ICommand {
 
 
     @Override
-    public void handle(@Nonnull SlashCommandInteractionEvent event) {
+    public void handle(@NonNull SlashCommandInteractionEvent event) {
         event.deferReply().queue();
         Integer bound = event.getOption(OPTION_BOUND_NAME, 100, OptionMapping::getAsInt);
 

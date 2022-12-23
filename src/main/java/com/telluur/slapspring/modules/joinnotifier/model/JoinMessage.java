@@ -2,10 +2,10 @@ package com.telluur.slapspring.modules.joinnotifier.model;
 
 import lombok.*;
 
-import javax.annotation.Nonnull;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 
 //JPA
 @Entity
@@ -22,6 +22,6 @@ public class JoinMessage {
     @Id
     private long id;
 
-    @Nonnull
+    @NotNull @NonNull //javax.validation for hibernate table generation, lombok for runtime
     private String formatString;
 }

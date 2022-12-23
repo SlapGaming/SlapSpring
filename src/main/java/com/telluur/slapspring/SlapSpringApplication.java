@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 
 import javax.security.auth.login.LoginException;
@@ -38,7 +37,6 @@ public class SlapSpringApplication {
     public String baseUrl(@Autowired BotProperties properties) {
         return properties.web_base_url();
     }
-
 
 
 }

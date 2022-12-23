@@ -1,6 +1,6 @@
 package com.telluur.slapspring.util.discord;
 
-import net.dv8tion.jda.api.entities.ChannelType;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
 
 import java.awt.*;
 

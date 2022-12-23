@@ -1,5 +1,6 @@
 package com.telluur.slapspring.modules.misc.discord.commands.restricted;
 
+import lombok.NonNull;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
@@ -7,8 +8,6 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Service;
-
-import javax.annotation.Nonnull;
 
 @Service
 public class KillSlashCommand extends AbstractRestrictedSlashCommand {
@@ -21,7 +20,7 @@ public class KillSlashCommand extends AbstractRestrictedSlashCommand {
     @Autowired
     private ConfigurableApplicationContext springApplication;
 
-    @Nonnull
+    @NonNull
     @Override
     public CommandData data() {
         return COMMAND_DATA;

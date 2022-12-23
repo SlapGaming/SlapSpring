@@ -5,9 +5,9 @@ import com.telluur.slapspring.modules.nsa.model.LoggedAttachment;
 import com.telluur.slapspring.modules.nsa.model.LoggedMessage;
 import com.telluur.slapspring.modules.nsa.model.LoggedMessageContent;
 import com.telluur.slapspring.modules.nsa.model.LoggedMessageRepository;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.GenericMessageEvent;
 import net.dv8tion.jda.api.events.message.MessageDeleteEvent;
@@ -16,8 +16,9 @@ import net.dv8tion.jda.api.events.message.MessageUpdateEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import net.dv8tion.jda.api.requests.restaction.MessageAction;
-import org.jetbrains.annotations.NotNull;
+import net.dv8tion.jda.api.requests.restaction.MessageCreateAction;
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
+import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -49,7 +50,7 @@ public class ChatListener extends ListenerAdapter {
     private String baseUrl;
 
     @Override
-    public void onMessageReceived(@NotNull MessageReceivedEvent event) {
+    public void onMessageReceived(@NonNull MessageReceivedEvent event) {
         //Skip bot messages, and non-focussed channels
         if (event.getAuthor().isBot() || !inFocusChannel(event)) {
             return;
@@ -114,7 +115,7 @@ public class ChatListener extends ListenerAdapter {
 
     @Transactional
     @Override
-    public void onMessageUpdate(@NotNull MessageUpdateEvent event) {
+    public void onMessageUpdate(@NonNull MessageUpdateEvent event) {
         //Skip bot messages, and non-focussed channels
         if (event.getAuthor().isBot() || !inFocusChannel(event)) {
             return;
@@ -168,13 +169,11 @@ public class ChatListener extends ListenerAdapter {
                         .setTitle("A message was edited")
                         .setDescription(description)
                         .build();
-
-                Message m = new MessageBuilder()
+                MessageCreateData mcd = new MessageCreateBuilder()
                         .setEmbeds(me)
-                        .setActionRows(archiveButton(msgId))
+                        .setComponents(createActionRowWithArchiveButton(msgId))
                         .build();
-
-                session.getNSATX().sendMessage(m).queue();
+                session.getNSATX().sendMessage(mcd).queue();
 
                 loggedMessage.appendContentHistory(eventMessage.getContentRaw());
                 messageRepository.save(loggedMessage);
@@ -230,7 +229,7 @@ public class ChatListener extends ListenerAdapter {
 
     @Transactional
     @Override
-    public void onMessageDelete(@NotNull MessageDeleteEvent event) {
+    public void onMessageDelete(@NonNull MessageDeleteEvent event) {
         //Skip non-focussed channels
         if (!inFocusChannel(event)) {
             return;
@@ -277,12 +276,12 @@ public class ChatListener extends ListenerAdapter {
                         .setDescription(description)
                         .build();
 
-                Message m = new MessageBuilder()
+                MessageCreateData mcd = new MessageCreateBuilder()
                         .setEmbeds(me)
-                        .setActionRows(archiveButton(msgId))
+                        .setComponents(createActionRowWithArchiveButton(msgId))
                         .build();
 
-                session.getNSATX().sendMessage(m).queue();
+                session.getNSATX().sendMessage(mcd).queue();
 
                 loggedMessage.setDeleted(); //Saved later
             }
@@ -322,17 +321,17 @@ public class ChatListener extends ListenerAdapter {
                 .setDescription(embedDescription)
                 .build();
 
-        Message m = new MessageBuilder()
+        MessageCreateData mcd = new MessageCreateBuilder()
                 .setEmbeds(me)
-                .setActionRows(archiveButton(msgId))
+                .setComponents(createActionRowWithArchiveButton(msgId))
                 .build();
 
-        MessageAction embedMessageAction = session.getNSATX().sendMessage(m);
+        MessageCreateAction embedMessageCreateAction = session.getNSATX().sendMessage(mcd);
         if (la.getContentType().contains("image") || la.getContentType().contains("video")) {
-            MessageAction mediaUrlMessageAction = session.getNSATX().sendMessage(attachmentUrl(la));
-            embedMessageAction.and(mediaUrlMessageAction).queue();
+            MessageCreateAction mediaUrlMessageCreateAction = session.getNSATX().sendMessage(attachmentUrl(la));
+            embedMessageCreateAction.and(mediaUrlMessageCreateAction).queue();
         } else {
-            embedMessageAction.queue();
+            embedMessageCreateAction.queue();
         }
     }
 
@@ -343,7 +342,7 @@ public class ChatListener extends ListenerAdapter {
      * @param event the event to perform the check on
      * @return true when it is a target channel for logging
      */
-    private boolean inFocusChannel(@NotNull GenericMessageEvent event) {
+    private boolean inFocusChannel(@NonNull GenericMessageEvent event) {
         return event.isFromGuild()
                 && event.getGuild().equals(session.getBoundGuild())
                 && !event.getChannel().equals(session.getNSATX());
@@ -354,7 +353,7 @@ public class ChatListener extends ListenerAdapter {
         return String.format("%s/attachments/%s/%s", baseUrl, loggedAttachment.getId(), loggedAttachment.getName());
     }
 
-    private ActionRow archiveButton(Long messageId) {
+    private ActionRow createActionRowWithArchiveButton(Long messageId) {
         String url = String.format("%s/messages/%d", baseUrl, messageId);
         return ActionRow.of(Button.link(url, "Show History"));
     }

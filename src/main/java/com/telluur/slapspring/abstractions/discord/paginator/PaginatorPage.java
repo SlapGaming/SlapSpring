@@ -2,33 +2,61 @@ package com.telluur.slapspring.abstractions.discord.paginator;
 
 import com.telluur.slapspring.util.discord.DiscordUtil;
 import lombok.*;
-import net.dv8tion.jda.api.MessageBuilder;
-import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
+import net.dv8tion.jda.api.utils.messages.MessageCreateData;
+import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
+import net.dv8tion.jda.api.utils.messages.MessageEditData;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
 
 
 @Getter
 @Builder(builderClassName = "Builder", access = AccessLevel.PUBLIC)
 public class PaginatorPage {
     private final @NonNull String paginatorId;
-    private final @Nullable String data;
+    private final String data; //Nullable
     private final int index, totalPages;
     private final @NonNull MessageEmbed messageEmbed;
     @Singular
-    private final @Nullable Collection<ActionRow> additionalActionRows;
+    private final Collection<ActionRow> additionalActionRows; // Might be null
 
     /**
-     * Attaches paginator buttons to a MessageEmbed for a specific page
+     * Creates a new paginator message, including the embeds, buttons, and additional actionrows.
      *
-     * @return a message containing the embed and ActionRow with first,prev,counter,next,last buttons.
+     * @return paginator CreateData
      */
-    public Message toDiscordMessage() {
+    public MessageCreateData toMessageCreateData() {
+        List<ActionRow> actionRows = createPaginatorActionRow();
+        return new MessageCreateBuilder()
+                .setEmbeds(messageEmbed)
+                .setComponents(actionRows)
+                .build();
+    }
+
+    /**
+     * Creates an edited paginator message, including the embeds, buttons, and additional actionrows.
+     *
+     * @return paginator EditData
+     */
+    public MessageEditData toMessageEditData() {
+        List<ActionRow> actionRows = createPaginatorActionRow();
+        return new MessageEditBuilder()
+                .setEmbeds(messageEmbed)
+                .setComponents(actionRows)
+                .build();
+    }
+
+    /**
+     * Computes paginator buttons for this paginator page.
+     *
+     * @return ActionRows containing paginator buttons and addiotionalActionRows if exists.
+     */
+    private List<ActionRow> createPaginatorActionRow() {
         String safeData = data != null ? data : "_";
 
         //Create back buttons, disable if on first page
@@ -55,7 +83,7 @@ public class PaginatorPage {
         if (additionalActionRows != null) {
             actionRows.addAll(additionalActionRows);
         }
-        return new MessageBuilder(messageEmbed).setActionRows(actionRows).build();
+        return actionRows;
     }
 
 

@@ -2,6 +2,7 @@ package com.telluur.slapspring.modules.ltg;
 
 import com.telluur.slapspring.core.discord.BotSession;
 import com.telluur.slapspring.modules.ltg.model.LTGGameRepository;
+import lombok.NonNull;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
@@ -10,7 +11,6 @@ import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -36,7 +36,7 @@ public class LTGRoleService {
      * @param success success callback
      * @param failure failure callback
      */
-    public void addMemberToRoleIfLTG(@Nonnull Member member, @Nonnull Role role, Consumer<Role> success, Consumer<Throwable> failure) {
+    public void addMemberToRoleIfLTG(@NonNull Member member, @NonNull Role role, Consumer<Role> success, Consumer<Throwable> failure) {
         addMemberToRolesIfLTG(member, List.of(role), roles -> success.accept(roles.get(0)), failure);
     }
 
@@ -50,7 +50,7 @@ public class LTGRoleService {
      * @param success success callback
      * @param failure failure callback
      */
-    public void addMemberToRolesIfLTG(@Nonnull Member member, @Nonnull Collection<Role> roles, Consumer<List<Role>> success, Consumer<Throwable> failure) {
+    public void addMemberToRolesIfLTG(@NonNull Member member, @NonNull Collection<Role> roles, Consumer<List<Role>> success, Consumer<Throwable> failure) {
         List<Role> validRoles = roles.stream()
                 .distinct()
                 .filter(role -> !member.getRoles().contains(role))
@@ -100,11 +100,11 @@ public class LTGRoleService {
         }
     }
 
-    public void removeMemberFromRolesIfLTG(@Nonnull Member member, @Nonnull Role role, Consumer<Role> success, Consumer<Throwable> failure) {
+    public void removeMemberFromRolesIfLTG(@NonNull Member member, @NonNull Role role, Consumer<Role> success, Consumer<Throwable> failure) {
         removeMemberFromRolesIfLTG(member, List.of(role), roles -> success.accept(roles.get(0)), failure);
     }
 
-    public void removeMemberFromRolesIfLTG(@Nonnull Member member, @Nonnull Collection<Role> roles, Consumer<List<Role>> success, Consumer<Throwable> failure) {
+    public void removeMemberFromRolesIfLTG(@NonNull Member member, @NonNull Collection<Role> roles, Consumer<List<Role>> success, Consumer<Throwable> failure) {
         List<Role> validRoles = roles.stream()
                 .distinct()
                 .filter(role -> member.getRoles().contains(role))

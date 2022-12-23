@@ -1,6 +1,7 @@
 package com.telluur.slapspring.modules.misc.discord.commands.admin;
 
 import com.telluur.slapspring.abstractions.discord.commands.ICommand;
+import lombok.NonNull;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
@@ -13,7 +14,6 @@ import net.dv8tion.jda.api.requests.RestAction;
 import net.dv8tion.jda.api.requests.restaction.AuditableRestAction;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 
 @Service
@@ -29,14 +29,14 @@ public class PruneChatSlashCommand implements ICommand {
             .setGuildOnly(true)
             .setDefaultPermissions(DefaultMemberPermissions.DISABLED);
 
-    @Nonnull
+    @NonNull
     @Override
     public CommandData data() {
         return COMMAND_DATA;
     }
 
     @Override
-    public void handle(@Nonnull SlashCommandInteractionEvent event) {
+    public void handle(@NonNull SlashCommandInteractionEvent event) {
         event.deferReply(true).queue();
 
         Integer limit = event.getOption(OPTION_LIMIT_NAME, null, OptionMapping::getAsInt);

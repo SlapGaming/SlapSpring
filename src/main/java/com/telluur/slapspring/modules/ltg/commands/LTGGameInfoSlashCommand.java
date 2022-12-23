@@ -9,9 +9,9 @@ import com.telluur.slapspring.modules.ltg.LTGQuickSubscribeService;
 import com.telluur.slapspring.modules.ltg.LTGUtil;
 import com.telluur.slapspring.modules.ltg.model.LTGGame;
 import com.telluur.slapspring.modules.ltg.model.LTGGameRepository;
+import lombok.NonNull;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -20,11 +20,11 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Nonnull;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -32,7 +32,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-public class GameInfoSlashCommand implements ICommand, IPaginator {
+public class LTGGameInfoSlashCommand implements ICommand, IPaginator {
     public static final String COMMAND_NAME = "gameinfo";
     public static final String COMMAND_DESCRIPTION = "Show more information about a Looking-To-Game role, including all subscribers.";
     public static final String OPTION_ROLE_NAME = "role";
@@ -53,22 +53,22 @@ public class GameInfoSlashCommand implements ICommand, IPaginator {
     @Autowired
     LTGQuickSubscribeService quickSubscribeService;
 
-    @Nonnull
+    @NonNull
     @Override
     public CommandData data() {
         return COMMAND_DATA;
     }
 
     @Override
-    public void handle(@Nonnull SlashCommandInteractionEvent event) {
+    public void handle(@NonNull SlashCommandInteractionEvent event) {
         Role role = Objects.requireNonNull(event.getOption(OPTION_ROLE_NAME, OptionMapping::getAsRole)); //Assumes working front end validation
 
         if (repository.existsById(role.getIdLong())) {
             boolean inLtgTx = event.getChannel().equals(session.getLTGTX());
             event.deferReply(!inLtgTx).queue();
             try {
-                Message msg = paginate(role.getId(), 0).toDiscordMessage();
-                event.getHook().sendMessage(msg).queue();
+                MessageCreateData mcd = paginate(role.getId(), 0).toMessageCreateData();
+                event.getHook().sendMessage(mcd).queue();
             } catch (PaginatorException e) {
                 MessageEmbed me = LTGUtil.failureEmbed(e.getMessage());
                 event.replyEmbeds(me).queue();
@@ -81,7 +81,7 @@ public class GameInfoSlashCommand implements ICommand, IPaginator {
     }
 
     @Override
-    public @Nonnull String getPaginatorId() {
+    public @NonNull String getPaginatorId() {
         return GAME_INFO_PAGINATOR_ID;
     }
 
@@ -110,7 +110,7 @@ public class GameInfoSlashCommand implements ICommand, IPaginator {
     }
 
     @Override
-    public @Nonnull PaginatorPage paginate(String data, int index) throws PaginatorException {
+    public @NonNull PaginatorPage paginate(String data, int index) throws PaginatorException {
         Role role = parseData(data);
 
         if (role != null) {
@@ -143,7 +143,7 @@ public class GameInfoSlashCommand implements ICommand, IPaginator {
                         .setFooter(
                                 String.format(
                                         "Use /%s to see all Looking-To-Game roles or use the button below to subscribe to %s.",
-                                        ListGamesSlashCommand.COMMAND_NAME, ltgGame.getAbbreviation())
+                                        LTGListGamesSlashCommand.COMMAND_NAME, ltgGame.getAbbreviation())
                         )
                         .build();
 

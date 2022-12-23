@@ -1,6 +1,7 @@
 package com.telluur.slapspring.modules.avatar.commands;
 
 import com.telluur.slapspring.abstractions.discord.commands.ICommand;
+import lombok.NonNull;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -12,7 +13,6 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Nonnull;
 import java.awt.*;
 import java.util.Objects;
 
@@ -37,14 +37,14 @@ public class AvatarSlashCommand implements ICommand {
             .addOptions(MEMBER_OPTION, TYPE_OPTION)
             .setGuildOnly(true);
 
-    @Nonnull
+    @NonNull
     @Override
     public CommandData data() {
         return COMMAND_DATA;
     }
 
     @Override
-    public void handle(@Nonnull SlashCommandInteractionEvent event) {
+    public void handle(@NonNull SlashCommandInteractionEvent event) {
         event.deferReply().queue();
 
         //Validated by the discord frontend.

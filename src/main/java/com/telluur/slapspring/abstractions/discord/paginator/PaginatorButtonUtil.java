@@ -1,6 +1,7 @@
 package com.telluur.slapspring.abstractions.discord.paginator;
 
-import javax.annotation.Nonnull;
+import lombok.NonNull;
+
 import java.util.regex.Pattern;
 
 final class PaginatorButtonUtil {
@@ -31,7 +32,7 @@ final class PaginatorButtonUtil {
      * @param index       the requested index target
      * @return formatted button id
      */
-    public static String buildButton(@Nonnull String paginatorId, @Nonnull String data, int index) {
+    public static String buildButton(@NonNull String paginatorId, @NonNull String data, int index) {
         return String.format("%s:%s:%s:%d", PAGINATOR_PREFIX, paginatorId, data, index);
     }
 
@@ -41,7 +42,7 @@ final class PaginatorButtonUtil {
      * @param paginatorId corresponding paginator
      * @return formatted button id
      */
-    public static String buildFirstButton(@Nonnull String paginatorId, @Nonnull String data) {
+    public static String buildFirstButton(@NonNull String paginatorId, @NonNull String data) {
         return String.format("%s:%s:%s:%s", PAGINATOR_PREFIX, paginatorId, data, PAGINATOR_FIRST_PAGE_INDEX);
     }
 
@@ -51,7 +52,7 @@ final class PaginatorButtonUtil {
      * @param paginatorId corresponding paginator
      * @return formatted button id
      */
-    public static String buildLastButton(@Nonnull String paginatorId, @Nonnull String data) {
+    public static String buildLastButton(@NonNull String paginatorId, @NonNull String data) {
         return String.format("%s:%s:%s:%s", PAGINATOR_PREFIX, paginatorId, data, PAGINATOR_LAST_PAGE_INDEX);
     }
 }

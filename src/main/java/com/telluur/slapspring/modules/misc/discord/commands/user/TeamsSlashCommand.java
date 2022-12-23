@@ -5,10 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
@@ -21,7 +19,8 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import org.jetbrains.annotations.NotNull;
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
+import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import org.springframework.stereotype.Service;
 
 import java.awt.*;
@@ -57,14 +56,14 @@ public class TeamsSlashCommand extends ListenerAdapter implements ICommand {
     //Stores live instances so we can respond to shuffle button request.
     private final Map<String, ShufflingMessage> instances = new HashMap<>();
 
-    @NotNull
+    @NonNull
     @Override
     public CommandData data() {
         return COMMAND_DATA;
     }
 
     @Override
-    public void handle(@NotNull SlashCommandInteractionEvent event) {
+    public void handle(@NonNull SlashCommandInteractionEvent event) {
         //Get users from calling voice channel
         Member member = Objects.requireNonNull(event.getMember()); //only used in guild
         GuildVoiceState memberVoiceState = member.getVoiceState();
@@ -105,12 +104,14 @@ public class TeamsSlashCommand extends ListenerAdapter implements ICommand {
         instances.put(event.getId(), new ShufflingMessage(event.getHook(), numberOfTeams, pool));
 
         MessageEmbed me = createShuffledTeamsMessage(numberOfTeams, pool);
-        Message msg = new MessageBuilder()
+        MessageCreateData mcd = new MessageCreateBuilder()
                 .setEmbeds(me)
-                .setActionRows(ActionRow.of(Button.primary(BUTTON_RESHUFLE_PREFIX + event.getId(), "Shuffle")))
+                .setComponents(ActionRow.of(Button.primary(BUTTON_RESHUFLE_PREFIX + event.getId(), "Shuffle")))
                 .build();
 
-        event.reply(msg).submit().thenCompose(interactionHook ->
+        //Send teams message, and schedule shuffle button disable and instance removal from memory
+        event.reply(mcd).submit()
+                .thenCompose(interactionHook ->
                         interactionHook.editOriginalComponents(
                                 ActionRow.of(Button.primary(BUTTON_RESHUFLE_PREFIX + event.getId(), "Shuffle").asDisabled())
                         ).submitAfter(30, TimeUnit.SECONDS))
@@ -119,7 +120,7 @@ public class TeamsSlashCommand extends ListenerAdapter implements ICommand {
 
 
     @Override
-    public void onButtonInteraction(@NotNull ButtonInteractionEvent event) {
+    public void onButtonInteraction(@NonNull ButtonInteractionEvent event) {
         String buttonId = event.getButton().getId();
         if (buttonId != null && buttonId.startsWith(BUTTON_RESHUFLE_PREFIX)) {
             String interactionHookId = buttonId.substring(BUTTON_RESHUFLE_PREFIX.length());
@@ -165,7 +166,7 @@ public class TeamsSlashCommand extends ListenerAdapter implements ICommand {
     @AllArgsConstructor
     @Getter
     private static class ShufflingMessage {
-        private InteractionHook interactionHook;
+        private InteractionHook interactionHook; //Valid for max 15 minutes
         private int numberOfTeams;
         private List<Member> pool;
     }

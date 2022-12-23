@@ -2,17 +2,17 @@ package com.telluur.slapspring.abstractions.discord.paginator;
 
 
 import com.telluur.slapspring.util.discord.DiscordUtil;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.MessageBuilder;
-import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
+import net.dv8tion.jda.api.utils.messages.MessageEditData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
@@ -34,14 +34,14 @@ import java.util.regex.Matcher;
 @Slf4j
 public class PaginatorService extends ListenerAdapter {
 
-    private final HashMap<String, IPaginator> paginators = new HashMap<>();
+    private final HashMap<String, IPaginator> registeredPaginators = new HashMap<>();
 
 
     public PaginatorService(@Autowired List<IPaginator> paginators) {
         log.info("Registering paginators: {}", paginators.stream()
                 .map(paginator -> String.format("%s (%s)", paginator.getClass().getSimpleName(), paginator.getPaginatorId()))
                 .toList());
-        paginators.forEach(ip -> this.paginators.put(ip.getPaginatorId(), ip));
+        paginators.forEach(p -> registeredPaginators.put(p.getPaginatorId(), p));
     }
 
 
@@ -49,7 +49,7 @@ public class PaginatorService extends ListenerAdapter {
      * CALLED BY JDA
      */
     @Override
-    public void onButtonInteraction(@Nonnull ButtonInteractionEvent event) {
+    public void onButtonInteraction(@NonNull ButtonInteractionEvent event) {
         String buttonId = event.getButton().getId();
         if (buttonId != null) {
             final Matcher matcher = PaginatorButtonUtil.FULL_BUTTON_REGEX.matcher(buttonId);
@@ -64,8 +64,8 @@ public class PaginatorService extends ListenerAdapter {
                 String data = Objects.requireNonNull(matcher.group(2));
                 String indexString = Objects.requireNonNull(matcher.group(3));
 
-                if (paginators.containsKey(paginatorId)) {
-                    IPaginator paginator = paginators.get(paginatorId);
+                if (registeredPaginators.containsKey(paginatorId)) {
+                    IPaginator paginator = registeredPaginators.get(paginatorId);
 
                     int totalPages = paginator.getNumberOfTotalPages(data);
 
@@ -75,10 +75,9 @@ public class PaginatorService extends ListenerAdapter {
                         default -> Integer.parseInt(indexString); //Should never throw since it passed the regex match.
                     };
 
-                    Message msg = null;
                     try {
-                        msg = paginator.paginate(data, requestedIndex).toDiscordMessage();
-                        event.getHook().editOriginal(msg).queue();
+                        MessageEditData med = paginator.paginate(data, requestedIndex).toMessageEditData();
+                        event.getHook().editOriginal(med).queue();
                     } catch (PaginatorException e) {
                         removePaginatorWithError(event, e.getMessage());
                     }
@@ -92,14 +91,14 @@ public class PaginatorService extends ListenerAdapter {
         //omitted else: id is null, not intended for this ListenerAdapter
     }
 
-    private void removePaginatorWithError(@Nonnull ButtonInteractionEvent event, @Nonnull String message) {
+    private void removePaginatorWithError(@NonNull ButtonInteractionEvent event, @NonNull String message) {
         MessageEmbed me = new EmbedBuilder()
                 .setColor(DiscordUtil.ERROR_COLOR)
                 .setTitle("Paginator error!")
                 .setDescription("Uh-oh, the button was recognized as a paginator, but failed to find the page content.")
                 .build();
-        Message msg = new MessageBuilder(me).build(); //removes the buttons.
-        event.getHook().editOriginal(msg).queue();
+        MessageEditData med = new MessageEditBuilder().setEmbeds(me).build(); //removes the buttons.
+        event.getHook().editOriginal(med).queue();
     }
 
 }

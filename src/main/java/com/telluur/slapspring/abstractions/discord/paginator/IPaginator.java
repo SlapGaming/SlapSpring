@@ -1,7 +1,7 @@
 package com.telluur.slapspring.abstractions.discord.paginator;
 
 
-import javax.annotation.Nonnull;
+import lombok.NonNull;
 
 /**
  * This interface houses the required methods for constructing a pageable MessageEmbed.
@@ -22,7 +22,7 @@ public interface IPaginator {
      *
      * @return paginator ID
      */
-    @Nonnull
+    @NonNull
     String getPaginatorId();
 
     /**
@@ -41,6 +41,6 @@ public interface IPaginator {
      * @param index 0 indexed number
      * @return Page content
      */
-    @Nonnull
+    @NonNull
     PaginatorPage paginate(String data, int index) throws PaginatorException;
 }

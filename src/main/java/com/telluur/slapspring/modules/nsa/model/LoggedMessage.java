@@ -4,6 +4,7 @@ import lombok.*;
 
 import javax.persistence.*;
 import javax.transaction.Transactional;
+import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -22,7 +23,7 @@ public class LoggedMessage {
     @Id
     private long id;
 
-    @Column(nullable = false)
+    @NotNull //javax.validation for hibernate table generation
     private long channelId, userId;
 
     private long referencedMessageId;
