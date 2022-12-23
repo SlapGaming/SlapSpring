@@ -1,6 +1,7 @@
-package com.telluur.slapspring.modules.nsa;
+package com.telluur.slapspring.modules.nsa.listeners;
 
 import com.telluur.slapspring.core.discord.BotSession;
+import com.telluur.slapspring.modules.nsa.NSAUtil;
 import com.telluur.slapspring.modules.nsa.model.LoggedAttachment;
 import com.telluur.slapspring.modules.nsa.model.LoggedMessage;
 import com.telluur.slapspring.modules.nsa.model.LoggedMessageContent;
@@ -23,7 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.awt.*;
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
@@ -35,8 +35,6 @@ import static com.telluur.slapspring.util.discord.DiscordUtil.channelTypeToStrin
 @Slf4j
 @Service
 public class ChatListener extends ListenerAdapter {
-    private static final Color NSA_EDIT_COLOR = new Color(1, 1, 222);
-    private static final Color NSA_DELETION_COLOR = Color.RED;
 
     private static final int CHAR_LIMIT = 1500;
 
@@ -165,7 +163,7 @@ public class ChatListener extends ListenerAdapter {
                         newRaw.length() <= CHAR_LIMIT ? newRaw : newRaw.substring(0, CHAR_LIMIT) + "..."
                 );
                 MessageEmbed me = new EmbedBuilder()
-                        .setColor(NSA_EDIT_COLOR)
+                        .setColor(NSAUtil.NSA_EDIT_COLOR)
                         .setTitle("A message was edited")
                         .setDescription(description)
                         .build();
@@ -271,7 +269,7 @@ public class ChatListener extends ListenerAdapter {
                         contentRaw.length() <= CHAR_LIMIT ? contentRaw : contentRaw.substring(0, CHAR_LIMIT) + "...");
 
                 MessageEmbed me = new EmbedBuilder()
-                        .setColor(NSA_DELETION_COLOR)
+                        .setColor(NSAUtil.NSA_DELETION_COLOR)
                         .setTitle("A message was deleted")
                         .setDescription(description)
                         .build();
@@ -316,7 +314,7 @@ public class ChatListener extends ListenerAdapter {
 
     private void sendAttachmentDeletionLog(long msgId, LoggedAttachment la, String embedDescription) {
         MessageEmbed me = new EmbedBuilder()
-                .setColor(NSA_DELETION_COLOR)
+                .setColor(NSAUtil.NSA_DELETION_COLOR)
                 .setTitle("An attachment was deleted")
                 .setDescription(embedDescription)
                 .build();
