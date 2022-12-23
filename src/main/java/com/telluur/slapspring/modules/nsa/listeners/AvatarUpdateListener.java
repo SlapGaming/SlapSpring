@@ -1,7 +1,7 @@
 package com.telluur.slapspring.modules.nsa.listeners;
 
 import com.telluur.slapspring.core.discord.BotSession;
-import com.telluur.slapspring.modules.avatar.commands.AvatarSlashCommand;
+import com.telluur.slapspring.modules.misc.discord.commands.user.AvatarSlashCommand;
 import com.telluur.slapspring.modules.nsa.NSAUtil;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;

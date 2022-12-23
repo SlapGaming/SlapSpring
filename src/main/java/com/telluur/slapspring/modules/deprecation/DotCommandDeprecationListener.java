@@ -1,6 +1,6 @@
 package com.telluur.slapspring.modules.deprecation;
 
-import com.telluur.slapspring.modules.avatar.commands.AvatarSlashCommand;
+import com.telluur.slapspring.modules.misc.discord.commands.user.AvatarSlashCommand;
 import com.telluur.slapspring.modules.ltg.commands.*;
 import com.telluur.slapspring.modules.misc.discord.commands.admin.PruneChatSlashCommand;
 import com.telluur.slapspring.modules.misc.discord.commands.admin.SaySlashCommand;

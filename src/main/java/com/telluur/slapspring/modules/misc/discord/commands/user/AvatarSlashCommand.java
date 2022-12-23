@@ -1,4 +1,4 @@
-package com.telluur.slapspring.modules.avatar.commands;
+package com.telluur.slapspring.modules.misc.discord.commands.user;
 
 import com.telluur.slapspring.abstractions.discord.commands.ICommand;
 import lombok.NonNull;
