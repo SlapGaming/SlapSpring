@@ -1,15 +1,11 @@
 package com.telluur.slapspring.modules.deprecation;
 
-import com.telluur.slapspring.modules.misc.discord.commands.user.AvatarSlashCommand;
 import com.telluur.slapspring.modules.ltg.commands.*;
 import com.telluur.slapspring.modules.misc.discord.commands.admin.PruneChatSlashCommand;
 import com.telluur.slapspring.modules.misc.discord.commands.admin.SaySlashCommand;
 import com.telluur.slapspring.modules.misc.discord.commands.restricted.EvalSlashCommand;
 import com.telluur.slapspring.modules.misc.discord.commands.restricted.KillSlashCommand;
-import com.telluur.slapspring.modules.misc.discord.commands.user.PingSlashCommand;
-import com.telluur.slapspring.modules.misc.discord.commands.user.RollSlashCommand;
-import com.telluur.slapspring.modules.misc.discord.commands.user.TeamsSlashCommand;
-import com.telluur.slapspring.modules.misc.discord.commands.user.VersionSlashCommand;
+import com.telluur.slapspring.modules.misc.discord.commands.user.*;
 import lombok.NonNull;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
