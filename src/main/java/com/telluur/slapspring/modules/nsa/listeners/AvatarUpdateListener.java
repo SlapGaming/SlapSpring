@@ -25,9 +25,10 @@ public class AvatarUpdateListener extends ListenerAdapter {
     public void onUserUpdateAvatar(@Nonnull UserUpdateAvatarEvent event) {
         User user = event.getUser();
         String url = user.getEffectiveAvatarUrl();
+        String updateFormat = "The *user* avatar of %s [%s#%s] was updated";
         session.getBoundGuild().retrieveMember(user).queue(
                 member -> {
-                    String title = String.format("The *guild* avatar of %s [%s#%s] was updated.",
+                    String title = String.format(updateFormat,
                             member.getAsMention(),
                             user.getName(),
                             user.getDiscriminator()
@@ -35,7 +36,7 @@ public class AvatarUpdateListener extends ListenerAdapter {
                     logToNSA(title, url);
                 },
                 error -> {
-                    String title = String.format("The *guild* avatar of %s [%s#%s] was updated.",
+                    String title = String.format(updateFormat,
                             user.getName(),
                             user.getName(),
                             user.getDiscriminator()
@@ -48,7 +49,7 @@ public class AvatarUpdateListener extends ListenerAdapter {
     @Override
     public void onGuildMemberUpdateAvatar(@Nonnull GuildMemberUpdateAvatarEvent event) {
         Member member = event.getMember();
-        String title = String.format("The *guild* avatar of %s [%s#%s] was updated.",
+        String title = String.format("The *guild* avatar of %s [%s#%s] was updated",
                 member.getAsMention(),
                 member.getUser().getName(),
                 member.getUser().getDiscriminator()
