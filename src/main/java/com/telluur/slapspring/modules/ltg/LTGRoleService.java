@@ -17,6 +17,10 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
+/**
+ * Service that implements adding/removing roles to/from members.
+ * Roles are restricted to the LTG roles listed in the DB.
+ */
 @Service
 public class LTGRoleService {
 

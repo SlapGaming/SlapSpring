@@ -32,6 +32,10 @@ import java.util.concurrent.CompletableFuture;
 
 import static com.telluur.slapspring.util.discord.DiscordUtil.channelTypeToString;
 
+/**
+ * Logging service that logs full message history to DB, and notifies admins in the NSA channel
+ * TODO implement EmojiReaction logging
+ */
 @Slf4j
 @Service
 public class ChatListener extends ListenerAdapter {

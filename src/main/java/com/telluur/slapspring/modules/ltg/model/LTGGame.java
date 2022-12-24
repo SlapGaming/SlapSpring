@@ -7,7 +7,9 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
-
+/**
+ * Represents a Discord role used for LTG roles.
+ */
 //JPA
 @Entity
 @Table(name = "ltg_game")

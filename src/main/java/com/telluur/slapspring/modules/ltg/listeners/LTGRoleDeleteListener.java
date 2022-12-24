@@ -8,6 +8,9 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+/**
+ * Listener that automatically removes an LTG role binding from the DB when it is deleted in Discord.
+ */
 @Service
 @Slf4j
 public class LTGRoleDeleteListener extends ListenerAdapter {

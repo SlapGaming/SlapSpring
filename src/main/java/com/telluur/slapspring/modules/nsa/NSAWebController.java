@@ -23,7 +23,12 @@ import javax.transaction.Transactional;
 
 import static com.telluur.slapspring.util.discord.DiscordUtil.channelTypeToString;
 
-
+/**
+ * Web page implementation for showing full message history
+ * All bound guild messages (incl. attachments) are logged to the webpage:
+ * Messagehistory: baseURL/messages/{messageID}
+ * Attachments: baseURL/attachments/{attachmentId}/{ignoredFileName}
+ */
 @Controller
 public class NSAWebController {
 

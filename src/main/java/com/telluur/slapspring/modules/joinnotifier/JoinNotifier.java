@@ -10,6 +10,11 @@ import org.springframework.stereotype.Service;
 
 import java.awt.*;
 
+/**
+ * Custom welcome service for new users joining the bound guild.
+ * Displays their avatar in an embed along with a welcome pun
+ * TODO move puns from hardcoded in source to DB.
+ */
 @Service
 public class JoinNotifier extends ListenerAdapter {
     @Autowired

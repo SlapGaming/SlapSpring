@@ -12,6 +12,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.Set;
 
+/**
+ * Chat listener that sends a quick subscribe when a LTG role is mentioned in the LTG channel.
+ */
 @Service
 public class LTGChatListener extends ListenerAdapter {
 

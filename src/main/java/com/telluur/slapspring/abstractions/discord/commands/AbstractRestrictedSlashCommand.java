@@ -1,12 +1,11 @@
-package com.telluur.slapspring.modules.misc.discord.commands.restricted;
+package com.telluur.slapspring.abstractions.discord.commands;
 
-import com.telluur.slapspring.abstractions.discord.commands.ICommand;
 import com.telluur.slapspring.core.discord.BotProperties;
 import lombok.NonNull;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 
-abstract class AbstractRestrictedSlashCommand implements ICommand {
+public abstract class AbstractRestrictedSlashCommand implements ICommand {
     @Autowired
     BotProperties botProperties;
 
@@ -29,5 +28,5 @@ abstract class AbstractRestrictedSlashCommand implements ICommand {
      * Systemcommands should implement this instead of handle().
      * @param event InteractionEvent dispatched by discord
      */
-    abstract void systemHandle(SlashCommandInteractionEvent event);
+    public abstract void systemHandle(SlashCommandInteractionEvent event);
 }

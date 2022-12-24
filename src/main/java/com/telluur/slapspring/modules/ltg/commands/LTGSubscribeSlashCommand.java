@@ -38,8 +38,8 @@ public class LTGSubscribeSlashCommand implements ICommand {
             .mapToObj(i -> new OptionData(OptionType.ROLE, OPTION_ROLE_NAME + i, OPTION_VAR_ROLE_DESCRIPTION, false))
             .toList();
     private static final CommandData COMMAND_DATA = Commands.slash(COMMAND_NAME, COMMAND_DESCRIPTION)
-            .addOptions(ROLE_OPTION)
-            .addOptions(VAR_ROLE_OPTIONS)
+            .addOptions(ROLE_OPTION) //TODO add autocomplete limiting to LTG roles
+            .addOptions(VAR_ROLE_OPTIONS) //TODO add autocomplete limiting to LTG roles
             .setGuildOnly(true);
 
     @Autowired

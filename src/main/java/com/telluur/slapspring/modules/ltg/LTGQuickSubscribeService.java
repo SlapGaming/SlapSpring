@@ -27,6 +27,11 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Service that creates and handles quick subscribe buttons/action rows.
+ * This service presents an interface to create the buttons, and handles subsequent button interactions.
+ * Buttons/action rows still need to be sent manually by other logic.
+ */
 @Service
 public class LTGQuickSubscribeService extends ListenerAdapter {
 

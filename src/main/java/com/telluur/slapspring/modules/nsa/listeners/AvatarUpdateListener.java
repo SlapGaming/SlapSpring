@@ -15,6 +15,10 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 
+/**
+ * Listener that logs changed avatars to the NSA channel
+ * TODO: Log this to the DB as well
+ */
 @Service
 public class AvatarUpdateListener extends ListenerAdapter {
 

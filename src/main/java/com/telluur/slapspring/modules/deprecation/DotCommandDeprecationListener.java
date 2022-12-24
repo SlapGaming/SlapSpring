@@ -20,6 +20,10 @@ import java.util.concurrent.TimeUnit;
 
 import static java.util.Map.entry;
 
+/**
+ * Chat listener that looks for users using old-style discord commands,
+ * and informs them they have been moved to Slash commands.
+ */
 @Service
 public class DotCommandDeprecationListener extends ListenerAdapter {
     public static final List<String> deprecatedPrefixes = List.of(".", "!");
@@ -55,7 +59,6 @@ public class DotCommandDeprecationListener extends ListenerAdapter {
             entry("avatar", AvatarSlashCommand.COMMAND_NAME),
 
             entry("roll", RollSlashCommand.COMMAND_NAME),
-            //TODO
             entry("teams", TeamsSlashCommand.COMMAND_NAME),
             //TODO
             entry("about", "UNIMPLEMENTED"),

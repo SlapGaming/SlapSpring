@@ -1,5 +1,6 @@
 package com.telluur.slapspring.modules.misc.discord.commands.restricted;
 
+import com.telluur.slapspring.abstractions.discord.commands.AbstractRestrictedSlashCommand;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.Permission;

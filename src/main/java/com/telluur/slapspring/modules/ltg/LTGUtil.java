@@ -12,6 +12,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.stream.Collectors;
 
+/**
+ * Util class used for consistent style in the LTG module
+ * - Embeds, messages, Buttons, etc.
+ */
 public class LTGUtil {
 
     public static final String LTG_INTERACTABLE_PREFIX = "LTG:";

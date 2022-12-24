@@ -33,21 +33,25 @@ import java.util.stream.IntStream;
 public class TeamsSlashCommand extends ListenerAdapter implements ICommand {
     public static final String COMMAND_NAME = "teams";
     public static final String COMMAND_DESCRIPTION = "Create random teams from the users in your voice channel.";
-
     public static final String OPTION_NUMBER_NAME = "number";
     public static final String OPTION_NUMBER_DESCRIPTION = "Number of teams to generate";
     public static final String OPTION_EXCLUSION_NAME = "exclusion";
     public static final String OPTION_EXCLUSION_DESCRIPTION = "The user you want to exclude";
 
-    private static final OptionData ROLE_OPTION = new OptionData(OptionType.INTEGER, OPTION_NUMBER_NAME, OPTION_NUMBER_DESCRIPTION, true)
+    private static final OptionData NUMBER_OPTION = new OptionData(OptionType.INTEGER, OPTION_NUMBER_NAME, OPTION_NUMBER_DESCRIPTION, true)
             .setRequiredRange(2, 9);
 
+    /*
+    TODO Update to JDA5 beta:
+    - Change to correct mentionable type
+    - Implement autocomplete to limit to the users in the VC
+     */
     private static final List<OptionData> VAR_EXCLUSION_OPTIONS = IntStream.range(1, 25)
-            .mapToObj(i -> new OptionData(OptionType.ROLE, OPTION_EXCLUSION_NAME + i, OPTION_EXCLUSION_DESCRIPTION, false))
+            .mapToObj(i -> new OptionData(OptionType.USER, OPTION_EXCLUSION_NAME + i, OPTION_EXCLUSION_DESCRIPTION, false))
             .toList();
 
     private static final CommandData COMMAND_DATA = Commands.slash(COMMAND_NAME, COMMAND_DESCRIPTION)
-            .addOptions(ROLE_OPTION)
+            .addOptions(NUMBER_OPTION)
             .addOptions(VAR_EXCLUSION_OPTIONS)
             .setGuildOnly(true);
 

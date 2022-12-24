@@ -12,9 +12,9 @@ import org.springframework.stereotype.Component;
 import java.util.HashMap;
 import java.util.List;
 
-/***
+/**
  * CommandClient for managing and using of Discord Slash Commands
- *
+ * <p>
  * Upserts all commands implementing the ICommand interface
  * Implements a single Listener for all commands, routing to the implementing command classes.
  */

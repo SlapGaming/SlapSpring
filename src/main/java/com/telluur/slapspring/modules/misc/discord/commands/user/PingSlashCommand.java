@@ -1,7 +1,10 @@
 package com.telluur.slapspring.modules.misc.discord.commands.user;
 
 import com.telluur.slapspring.abstractions.discord.commands.ICommand;
+import com.telluur.slapspring.util.discord.DiscordUtil;
 import lombok.NonNull;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
@@ -28,7 +31,7 @@ public class PingSlashCommand implements ICommand {
             "Why are spiders great ping pong players?\n" +
                     "Cause they have great topspin.",
             "What happens when you use pickles for a ping pong game? \n" +
-                    "You get a volley of the Dills. \n",
+                    "You get a volley of the Dills.",
             "When does a ping pong player go to sleep? \n" +
                     "Around Tennish. ",
             "What's a horse's favorite sport? \n" +
@@ -53,11 +56,16 @@ public class PingSlashCommand implements ICommand {
 
         event.getJDA().getRestPing().submit()
                 .thenCompose(restPing -> {
-                    String reply = String.format("%s\r\nREST Ping: `%dms`\r\nGateway ping: `%dms`",
+                    String description = String.format("%s\r\n\r\nREST Ping: `%dms`\r\nGateway ping: `%dms`",
                             puns[random.nextInt(puns.length)],
                             restPing,
                             gatewayPing);
-                    return event.getHook().sendMessage(reply).submit();
+                    MessageEmbed me = new EmbedBuilder()
+                            .setColor(DiscordUtil.SUCCESS_COLOR)
+                            .setTitle("Pong!")
+                            .appendDescription(description)
+                            .build();
+                    return event.getHook().sendMessageEmbeds(me).submit();
                 });
     }
 }
