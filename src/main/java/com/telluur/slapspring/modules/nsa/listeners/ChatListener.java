@@ -161,7 +161,7 @@ public class ChatListener extends ListenerAdapter {
                         channelTypeToString(event.getChannelType()),
                         event.getChannel().getName(),
                         Objects.requireNonNull(event.getMember()).getAsMention(), //Checked by event.isFromGuild()
-                        event.getAuthor().getAsTag(),
+                        event.getAuthor().getEffectiveName(),
                         contentHistory.size(),
                         oldRaw.length() <= CHAR_LIMIT ? oldRaw : oldRaw.substring(0, CHAR_LIMIT) + "...",
                         newRaw.length() <= CHAR_LIMIT ? newRaw : newRaw.substring(0, CHAR_LIMIT) + "..."
@@ -217,7 +217,7 @@ public class ChatListener extends ListenerAdapter {
                             channelTypeToString(event.getChannelType()),
                             event.getChannel().getName(),
                             Objects.requireNonNull(event.getMember()).getAsMention(), //Checked by event.isFromGuild()
-                            event.getAuthor().getAsTag(),
+                            event.getAuthor().getEffectiveName(),
                             la.getName(),
                             la.getContentType(),
                             attUrl);
@@ -249,7 +249,7 @@ public class ChatListener extends ListenerAdapter {
             String memberMention = member != null ? member.getAsMention() : "<NON SLAP>";
 
             User user = session.getJda().getUserById(loggedMessage.getUserId());
-            String userMention = user != null ? user.getAsTag() : "<UNKNOWN>";
+            String userMention = user != null ? user.getEffectiveName() : "<UNKNOWN>";
 
 
             List<LoggedMessageContent> contentHistory = loggedMessage.getContentHistory();

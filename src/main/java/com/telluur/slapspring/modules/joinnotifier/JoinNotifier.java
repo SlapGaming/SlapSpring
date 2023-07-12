@@ -27,7 +27,7 @@ public class JoinNotifier extends ListenerAdapter {
                         .setColor(Color.CYAN)
                         .setTitle(member.getEffectiveName())
                         .setDescription(String.format(JoinMessages.randomJoinMessage(), member.getAsMention()))
-                        .setThumbnail(member.getEffectiveAvatarUrl()).build()
+                        .setImage(String.format("%s%s", member.getEffectiveAvatarUrl(), "?size=2048")).build()
         ).queue();
     }
 

@@ -26,7 +26,7 @@ import static com.telluur.slapspring.util.discord.DiscordUtil.channelTypeToStrin
 /**
  * Web page implementation for showing full message history
  * All bound guild messages (incl. attachments) are logged to the webpage:
- * Messagehistory: baseURL/messages/{messageID}
+ * Message history: baseURL/messages/{messageID}
  * Attachments: baseURL/attachments/{attachmentId}/{ignoredFileName}
  */
 @Controller
@@ -55,9 +55,9 @@ public class NSAWebController {
         if (user != null) {
             Member member = botSession.getBoundGuild().getMemberById(userId);
             if (member != null) {
-                userName = String.format("%s (%s)", member.getEffectiveName(), user.getAsTag());
+                userName = String.format("%s (%s)", member.getEffectiveName(), user.getEffectiveName());
             } else {
-                userName = user.getAsTag();
+                userName = user.getEffectiveName();
             }
         } else {
             userName = String.valueOf(userId);
@@ -80,24 +80,15 @@ public class NSAWebController {
 
     @GetMapping(value = "/attachments/{attachmentId}")
     ResponseEntity<Resource> downloadAttachment(@PathVariable Long attachmentId) {
-        LoggedAttachment la = attachmentRepository.findById(attachmentId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-
-        ByteArrayResource bar = new ByteArrayResource(la.getContent());
-
-
-        try {
-            HttpHeaders responseHeaders = new HttpHeaders();
-            MediaType mediaType = MediaType.parseMediaType(la.getContentType());
-            responseHeaders.setContentType(mediaType);
-            return new ResponseEntity<Resource>(bar, responseHeaders, HttpStatus.OK);
-        } catch (InvalidMediaTypeException | InvalidMimeTypeException e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Could not determine the MimeType of the requested resource.");
-        }
+        return fetchAttachementById(attachmentId);
     }
 
     @GetMapping(value = "/attachments/{attachmentId}/{ignoredFileName}")
     ResponseEntity<Resource> downloadAttachmentWithFilePlaceholder(@PathVariable Long attachmentId) {
+        return fetchAttachementById(attachmentId);
+    }
+
+    private ResponseEntity<Resource> fetchAttachementById(Long attachmentId) {
         LoggedAttachment la = attachmentRepository.findById(attachmentId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
@@ -108,7 +99,7 @@ public class NSAWebController {
             HttpHeaders responseHeaders = new HttpHeaders();
             MediaType mediaType = MediaType.parseMediaType(la.getContentType());
             responseHeaders.setContentType(mediaType);
-            return new ResponseEntity<Resource>(bar, responseHeaders, HttpStatus.OK);
+            return new ResponseEntity<>(bar, responseHeaders, HttpStatus.OK);
         } catch (InvalidMediaTypeException | InvalidMimeTypeException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Could not determine the MimeType of the requested resource.");
         }

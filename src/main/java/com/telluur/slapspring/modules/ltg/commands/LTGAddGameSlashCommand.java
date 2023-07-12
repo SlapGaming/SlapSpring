@@ -66,7 +66,7 @@ public class LTGAddGameSlashCommand extends ListenerAdapter implements ICommand 
                 .build();
 
         Modal modal = Modal.create(MODAL_ID, "Add an LTG Game")
-                .addActionRows(ActionRow.of(abbrv), ActionRow.of(name))
+                .addComponents(ActionRow.of(abbrv), ActionRow.of(name))
                 .build();
 
         event.replyModal(modal).queue();
@@ -107,7 +107,7 @@ public class LTGAddGameSlashCommand extends ListenerAdapter implements ICommand 
                             role -> {
                                 LTGGame ltgGame = new LTGGame(role.getIdLong(), abbreviation, fullname, null);
                                 gameRepository.save(ltgGame);
-                                ltgLogger.info(String.format("`%s` created LTG role `%s` with id `%s`.", event.getUser().getAsTag(), role.getName(), role.getId()));
+                                ltgLogger.info(String.format("`%s` created LTG role `%s` with id `%s`.", event.getUser().getEffectiveName(), role.getName(), role.getId()));
 
 
                                 MessageEmbed me = LTGUtil.successEmbed(String.format("Created LTG role, `%s`.\n" +

@@ -63,7 +63,7 @@ public class AvatarSlashCommand implements ICommand {
 
         MessageEmbed me = new EmbedBuilder()
                 .setColor(Color.orange)
-                .setTitle(String.format("%s | %s [%s#%s]", title, member.getEffectiveName(), member.getUser().getName(), member.getUser().getDiscriminator()))
+                .setTitle(String.format("%s | %s [%s]", title, member.getEffectiveName(), member.getUser().getEffectiveName()))
                 .setImage(String.format("%s%s", url, "?size=2048"))
                 .build();
         event.getHook().sendMessageEmbeds(me).queue();

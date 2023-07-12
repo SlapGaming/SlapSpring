@@ -120,10 +120,9 @@ public class LTGGameInfoSlashCommand implements ICommand, IPaginator {
                         .sorted(Comparator.comparing(Member::getEffectiveName))
                         .skip((long) index * PAGE_SIZE) //Skip items to get to the indexed page
                         .limit(PAGE_SIZE) //Max 10 items
-                        .map(member -> String.format("- %s (%s#%s)",
+                        .map(member -> String.format("- %s (%s)",
                                 member.getAsMention(),
-                                member.getUser().getName(),
-                                member.getUser().getDiscriminator()))
+                                member.getUser().getEffectiveName()))
                         .collect(Collectors.joining("\r\n"));
 
                 LTGGame ltgGame = optionalLTGGame.get();
