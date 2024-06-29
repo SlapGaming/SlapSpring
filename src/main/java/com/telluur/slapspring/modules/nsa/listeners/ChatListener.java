@@ -297,7 +297,7 @@ public class ChatListener extends ListenerAdapter {
                         String description = String.format("""
                                         **%s:** %s
                                         **Member:** %s (%s)
-                                                                            
+                                                                               
                                         **File name:** %s
                                         **Content Type:** %s
                                         **NSA Link:** %s

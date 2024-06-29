@@ -25,7 +25,8 @@ public class LTGGame {
     @Id
     private long id;
 
-    @NotNull @NonNull //javax.validation for hibernate table generation, lombok for runtime
+    @NotNull
+    @NonNull //javax.validation for hibernate table generation, lombok for runtime
     private String abbreviation, fullName;
 
     private String description;

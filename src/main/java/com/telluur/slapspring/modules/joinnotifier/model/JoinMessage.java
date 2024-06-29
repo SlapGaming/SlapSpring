@@ -22,6 +22,7 @@ public class JoinMessage {
     @Id
     private long id;
 
-    @NotNull @NonNull //javax.validation for hibernate table generation, lombok for runtime
+    @NotNull
+    @NonNull //javax.validation for hibernate table generation, lombok for runtime
     private String formatString;
 }
